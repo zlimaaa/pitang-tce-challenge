@@ -3,6 +3,8 @@ package br.com.api.pitang.controllers;
 import br.com.api.pitang.data.dtos.AuthDTO;
 import br.com.api.pitang.services.AuthService;
 import io.swagger.annotations.Api;
+import java.util.Map;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import static org.springframework.http.ResponseEntity.ok;
@@ -20,7 +22,7 @@ public class AuthController {
    private AuthService service;
 
     @PostMapping
-    public ResponseEntity signIn(@RequestBody AuthDTO authDTO) {
+    public ResponseEntity<Map<Object, Object>> signIn(@Valid @RequestBody AuthDTO authDTO) {
         return ok(this.service.signIn(authDTO));
     }
 }

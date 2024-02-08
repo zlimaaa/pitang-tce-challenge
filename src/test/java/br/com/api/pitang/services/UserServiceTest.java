@@ -4,6 +4,7 @@ import static br.com.api.pitang.constants.MessagesConstants.EMAIL_ALREADY_EXISTS
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_FIELDS;
 import static br.com.api.pitang.constants.MessagesConstants.LOGIN_ALREADY_EXISTS;
 import static br.com.api.pitang.constants.MessagesConstants.MISSING_FIELDS;
+import static br.com.api.pitang.constants.MessagesConstants.USER_NOT_FOUND;
 import br.com.api.pitang.data.dtos.UserDTO;
 import br.com.api.pitang.data.models.User;
 import br.com.api.pitang.exceptions.ValidationException;
@@ -11,7 +12,10 @@ import static br.com.api.pitang.factory.UserFactory.buildUserDTOs;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
 import br.com.api.pitang.repositories.UserRepository;
 import java.time.LocalDate;
+import static java.util.Arrays.asList;
+import java.util.List;
 import static java.util.Optional.of;
+import javax.persistence.EntityNotFoundException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -23,11 +27,17 @@ import org.junit.jupiter.api.TestInstance;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import org.junit.jupiter.api.TestMethodOrder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -282,5 +292,90 @@ public class UserServiceTest {
         assertEquals("11989774271", user.getPhone());
         assertNotNull(user.getCreatedAt());
         assertNotNull(user.getLastLogin());
+    }
+
+    @Test
+    @Order(16)
+    @DisplayName("Deletando usuario por id")
+    public void deleteUser() {
+        when(this.repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(1)));
+        doNothing().when(this.repository).deleteById(2L);
+
+        service.delete(2L);
+
+        verify(this.repository, times(1)).findDistinctById(2L);
+        verify(this.repository, times(1)).deleteById(2L);
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("Error ao deletar usuario com id inexistente")
+    public void deleteUserError() {
+        when(this.repository.findDistinctById(2L)).thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
+
+        try{
+            service.delete(2L);
+        } catch (Exception ex) {
+            assertEquals(EntityNotFoundException.class, ex.getClass());
+            assertEquals(USER_NOT_FOUND, ex.getMessage());
+        }
+
+        verify(this.repository, times(1)).findDistinctById(2L);
+        verify(this.repository, times(0)).deleteById(2L);
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("Consultando todos os usuarios")
+    public void findAll() {
+        List<User> users = asList(buildUsers().get(0), buildUsers().get(1));
+        Page<User> page = new PageImpl<>(users);
+
+        when(this.repository.findAll(any(Pageable.class))).thenReturn(page);
+
+        Page<UserDTO> response = service.findAll(0, 10);
+
+        assertNotNull(response);
+        assertEquals(2, response.getTotalElements());
+        assertEquals(1L, response.getContent().get(0).getId());
+        assertEquals("Ricardo", response.getContent().get(0).getFirstName());
+        assertEquals("ricardo@gmail.com", response.getContent().get(0).getEmail());
+        assertEquals("81988775423", response.getContent().get(0).getPhone());
+        assertEquals(2L, response.getContent().get(1).getId());
+        assertEquals("Fernando", response.getContent().get(1).getFirstName());
+        assertEquals("nando@gmail.com", response.getContent().get(1).getEmail());
+        assertEquals("11989774271", response.getContent().get(1).getPhone());
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("Atualizando usuario com sucesso")
+    public void updateUser() {
+        User userUpdated = buildUsers().get(0);
+        userUpdated.setBirthDate(LocalDate.of(1990,12,15));
+        userUpdated.setLastName("Silva");
+
+        when(this.repository.findDistinctById(1L)).thenReturn(of(buildUsers().get(0)));
+        when(this.repository.countByEmailAndIdNot("ricardo@gmail.com", 0L)).thenReturn(0L);
+        when(this.repository.countByLoginAndIdNot("ricardo", 0L)).thenReturn(0L);
+        when(this.repository.save(any(User.class))).thenReturn(userUpdated);
+
+        UserDTO userDTO = buildUserDTOs().get(0);
+        userDTO.setBirthDate(LocalDate.of(1990,12,15));
+        userDTO.setLastName("Silva");
+        userDTO.setPassword(null);
+
+        userDTO = this.service.save(userDTO);
+
+        assertEquals(1L, userDTO.getId());
+        assertEquals("Ricardo", userDTO.getFirstName());
+        assertEquals("Silva", userDTO.getLastName());
+        assertEquals(LocalDate.of(1990,12,15), userDTO.getBirthDate());
+        assertEquals("ricardo@gmail.com", userDTO.getEmail());
+        assertEquals("ricardo", userDTO.getLogin());
+        assertEquals("$2a$10$AQe5K87Y5CysW4un0eDi5OAncw.zUYqlfsQw7aSEMvtRMxYKM0EwO", userDTO.getPassword());
+        assertEquals("81988775423", userDTO.getPhone());
+        assertNotNull(userDTO.getCreatedAt());
+        assertNull(userDTO.getLastLogin());
     }
 }

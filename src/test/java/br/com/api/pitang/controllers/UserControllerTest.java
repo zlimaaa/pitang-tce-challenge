@@ -5,12 +5,15 @@ import br.com.api.pitang.adapters.LocalDateTypeAdapter;
 import br.com.api.pitang.configs.security.UserDetail;
 import static br.com.api.pitang.constants.MessagesConstants.EMAIL_ALREADY_EXISTS;
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_FIELDS;
+import static br.com.api.pitang.constants.MessagesConstants.LOGIN_ALREADY_EXISTS;
+import static br.com.api.pitang.constants.MessagesConstants.MISSING_FIELDS;
 import static br.com.api.pitang.constants.MessagesConstants.USER_NOT_FOUND;
 import br.com.api.pitang.data.dtos.UserDTO;
 import br.com.api.pitang.data.models.User;
 import static br.com.api.pitang.factory.UserFactory.buildUserDTOs;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
 import br.com.api.pitang.repositories.UserRepository;
+import static br.com.api.pitang.utils.DozerConverter.convertObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
@@ -36,11 +39,14 @@ import static org.springframework.security.core.context.SecurityContextHolder.se
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.NestedServletException;
 
 @ActiveProfiles("test")
@@ -82,6 +88,7 @@ public class UserControllerTest {
 
     @Test
     @Order(1)
+    @Transactional
     @DisplayName("Criando usuario com sucesso")
     public void createUser() throws Exception {
         UserDTO userDTO = buildUserDTOs().get(0);
@@ -96,14 +103,13 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("ricardo@gmail.com"))
                 .andExpect(jsonPath("$.login").value("ricardo"))
                 .andExpect(jsonPath("$.phone").value("81988775423"))
-                .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.lastLogin").isEmpty());
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
     }
 
     @Test
     @Order(2)
     @DisplayName("Erro ao criar usuario com email existente")
-    public void errorCreateUserWithInvalidEmailT01() throws Exception {
+    public void errorCreateUserWithEmailAlreadyExists() throws Exception {
         UserDTO userDTO = buildUserDTOs().get(2);
         userDTO.setEmail("luquinhas@gmail.com");
 
@@ -116,7 +122,7 @@ public class UserControllerTest {
     @Test
     @Order(3)
     @DisplayName("Erro ao criar usuario com email invalido")
-    public void errorCreateUserWithInvalidEmailT02() throws Exception {
+    public void errorCreateUserWithInvalidEmail() throws Exception {
         UserDTO userDTO = buildUserDTOs().get(2);
         userDTO.setEmail("@lui.za");
 
@@ -128,6 +134,33 @@ public class UserControllerTest {
 
     @Test
     @Order(4)
+    @DisplayName("Erro ao criar usuario com login existente")
+    public void errorCreateUserWithLoginAlreadyExists() throws Exception {
+        UserDTO userDTO = buildUserDTOs().get(2);
+        userDTO.setLogin("luquinhas");
+
+        String errorMessage = requireNonNull(this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+                .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
+
+        assertEquals(LOGIN_ALREADY_EXISTS, errorMessage);
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Erro ao criar usuario com campos faltando")
+    public void errorCreateUserWithMissingFields() throws Exception {
+        UserDTO userDTO = buildUserDTOs().get(2);
+        userDTO.setLogin(" ");
+        userDTO.setPhone(null);
+
+        String errorMessage = requireNonNull(this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+                .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
+
+        assertTrue(errorMessage.contains(MISSING_FIELDS));
+    }
+
+    @Test
+    @Order(6)
     @DisplayName("Consultando usuário pelo id")
     public void findUser() throws Exception {
         this.mockMvc.perform(get("/api/users/" + userId))
@@ -139,12 +172,11 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("luquinhas@gmail.com"))
                 .andExpect(jsonPath("$.login").value("luquinhas"))
                 .andExpect(jsonPath("$.phone").value("21988826756"))
-                .andExpect(jsonPath("$.createdAt").isNotEmpty())
-                .andExpect(jsonPath("$.lastLogin").isEmpty());
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
     }
 
     @Test
-    @Order(5)
+    @Order(7)
     @DisplayName("Erro ao consultar usuario com id inexistente")
     public void errorFindUser() {
 
@@ -156,4 +188,63 @@ public class UserControllerTest {
             assertTrue(ex.getMessage().contains(USER_NOT_FOUND));
         }
     }
+
+    @Test
+    @Order(8)
+    @DisplayName("Consultando todos os usuarios")
+    public void findAllUsers() throws Exception {
+        this.mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content.[0].id").value(userId))
+                .andExpect(jsonPath("$.content.[0].firstName").value("Lucas"))
+                .andExpect(jsonPath("$.content.[0].lastName").value("Filho"))
+                .andExpect(jsonPath("$.content.[0].birthDate").value("11/11/2000"))
+                .andExpect(jsonPath("$.content.[0].email").value("luquinhas@gmail.com"))
+                .andExpect(jsonPath("$.content.[0].login").value("luquinhas"))
+                .andExpect(jsonPath("$.content.[0].phone").value("21988826756"))
+                .andExpect(jsonPath("$.content.[0].createdAt").isNotEmpty());
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("Atualizando usuario com sucesso")
+    public void updateUser() throws Exception {
+        User user = buildUsers().get(2);
+        user.setBirthDate(LocalDate.of(1998, 4, 25));
+        user.setLastName("Santos");
+        UserDTO userDTO = convertObject(user, UserDTO.class);
+        this.mockMvc.perform(put("/api/users/" + userId).contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userId))
+                .andExpect(jsonPath("$.firstName").value("Lucas"))
+                .andExpect(jsonPath("$.lastName").value("Santos"))
+                .andExpect(jsonPath("$.birthDate").value("25/04/1998"))
+                .andExpect(jsonPath("$.email").value("luquinhas@gmail.com"))
+                .andExpect(jsonPath("$.login").value("luquinhas"))
+                .andExpect(jsonPath("$.phone").value("21988826756"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("Exluindo usuario com sucesso")
+    public void deleteUser() throws Exception {
+        this.mockMvc.perform(delete("/api/users/" + userId)).andExpect(status().isNoContent());
+
+        assertTrue(this.repository.findById(userId).isEmpty());
+    }
+    @Test
+    @Order(11)
+    @DisplayName("Erro ao excluir usuario inexistente")
+    public void deleteUserError() throws Exception {
+        try {
+            this.mockMvc.perform(delete("/api/users/99")).andExpect(status().isNotFound());
+        } catch (Exception ex) {
+            assertEquals(NestedServletException.class, ex.getClass());
+            assertTrue(ex.getMessage().contains(USER_NOT_FOUND));
+        }
+    }
+
+
 }

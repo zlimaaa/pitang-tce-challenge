@@ -17,6 +17,9 @@ import static java.time.LocalDateTime.now;
 import javax.persistence.EntityNotFoundException;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,12 @@ public class UserService {
         return this.convertEntityToDTO(user);
     }
 
+    public Page<UserDTO> findAll(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<User> users =  this.repository.findAll(pageable);
+        return users.map(this::convertEntityToDTO);
+    }
+
     public UserDTO findOne(Long id) {
         return convertEntityToDTO(this.repository.findDistinctById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND)));
@@ -54,46 +63,56 @@ public class UserService {
         this.repository.updateLastLogin(userId, now());
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long id) {
+        this.findOne(id);
+        this.repository.deleteById(id);
+    }
+
 
     private void validateFields(User user) throws ValidationException {
 
-        if (isBlank(user.getFirstName()))
+        if (isBlank(user.getFirstName()) ||
+                isBlank(user.getLastName()) ||
+                user.getBirthDate() == null ||
+                isBlank(user.getEmail()) ||
+                isBlank(user.getLogin()) ||
+                isBlank(user.getPhone()))
             throw new ValidationException(MISSING_FIELDS);
 
-        if (isBlank(user.getLastName()))
-            throw new ValidationException(MISSING_FIELDS);
-
-        if (user.getBirthDate() == null)
-            throw new ValidationException(MISSING_FIELDS);
-
-        if (user.getBirthDate().isAfter(LocalDate.now()))
+        if (user.getBirthDate().isAfter(LocalDate.now()) ||
+                !isValidEmail(user.getEmail()) ||
+                user.getPhone().length() != 11)
             throw new ValidationException(INVALID_FIELDS);
 
-        if (isBlank(user.getEmail()))
-            throw new ValidationException(MISSING_FIELDS);
-
-        if (!isValidEmail(user.getEmail()))
-            throw new ValidationException(INVALID_FIELDS);
-
-        if (isBlank(user.getLogin()))
-            throw new ValidationException(MISSING_FIELDS);
-
-        if (isBlank(user.getPassword()))
-            throw new ValidationException(MISSING_FIELDS);
-
-        if (isBlank(user.getPhone()))
-            throw new ValidationException(MISSING_FIELDS);
-
-        if (!(user.getPhone().length() == 11))
-            throw new ValidationException(INVALID_FIELDS);
-
-        if (user.getId() == null) {
-            user.setCreatedAt(now());
-        }
+        if (user.getId() == null)
+           this.validateInsert(user);
+        else
+            this.validateUpdate(user);
 
         user.setLogin(user.getLogin().toLowerCase());
         user.setEmail(user.getEmail().toLowerCase());
+
+    }
+
+    private void validateInsert(User user) {
+        if (isBlank(user.getPassword()))
+            throw new ValidationException(MISSING_FIELDS);
+
+        user.setCreatedAt(now());
         user.setPassword(generatePasswordHash(user.getPassword()));
+    }
+
+    private void validateUpdate(User user) {
+        User userSaved = this.convertDTOtoEntity(this.findOne(user.getId()));
+
+        if (!isBlank(user.getPassword()))
+            user.setPassword(generatePasswordHash(user.getPassword()));
+        else
+            user.setPassword(userSaved.getPassword());
+
+        user.setCreatedAt(userSaved.getCreatedAt());
+        user.setLastLogin(userSaved.getLastLogin());
     }
 
     private void unique(User user) throws ValidationException {

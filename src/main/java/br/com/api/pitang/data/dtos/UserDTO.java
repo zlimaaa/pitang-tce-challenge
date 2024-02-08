@@ -5,6 +5,8 @@ import static br.com.api.pitang.constants.MessagesConstants.MISSING_FIELDS;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(NON_NULL)
 @JsonPropertyOrder({ "id", "firstName", "lastName", "birthDate", "email", "login", "phone", "createdAt","lastLogin" })
 @JsonIgnoreProperties(value = { "password" }, allowSetters = true)
 public class UserDTO implements Serializable {

@@ -9,6 +9,7 @@ import br.com.api.pitang.repositories.UserRepository;
 import br.com.api.pitang.services.UserService;
 import com.google.gson.Gson;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -125,5 +126,14 @@ public class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Marcos"))
                 .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @AfterAll
+    @DisplayName("Deletando o usario criado no banco de dados")
+    public void deleteUserAfterFinishTests(){
+       this.userRepository.findDistinctByLogin("marcos")
+               .ifPresent(
+                       u -> this.userRepository.deleteById(u.getId())
+               );
     }
 }
