@@ -5,6 +5,7 @@ import br.com.api.pitang.data.models.User;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -123,5 +124,19 @@ public class UserRepositoryTest {
         User user = this.repository.findDistinctById(this.user.getId()).get();
 
         assertNotNull(user.getLastLogin());
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Deletando usuário")
+    public void deleteUserById() {
+        this.repository.deleteById(this.user.getId());
+
+        try {
+            this.repository.findById(this.user.getId()).get();
+        }catch (Exception ex) {
+            assertEquals(NoSuchElementException.class, ex.getClass());
+            assertEquals("No value present", ex.getMessage());
+        }
     }
 }

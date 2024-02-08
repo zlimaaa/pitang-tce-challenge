@@ -3,14 +3,23 @@ package br.com.api.pitang.controllers;
 import br.com.api.pitang.data.dtos.UserDTO;
 import br.com.api.pitang.services.UserService;
 import io.swagger.annotations.Api;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import org.springframework.http.ResponseEntity;
 import static org.springframework.http.ResponseEntity.ok;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Api(value = "Users", tags = "Users")
@@ -21,12 +30,29 @@ public class UserController {
     private UserService service;
 
     @PostMapping
-    public ResponseEntity create(@Valid @RequestBody UserDTO user) {
-        return new ResponseEntity<>(service.save(user), CREATED);
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO user) {
+        return new ResponseEntity<>(this.service.save(user), CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity findOne(@PathVariable Long id) {
-        return ok(service.findOne(id));
+    public ResponseEntity<UserDTO> findOne(@PathVariable Long id) {
+        return ok(this.service.findOne(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO user) {
+        user.setId(id);
+        return ok(this.service.save(user));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<UserDTO>> findAll(@RequestParam(defaultValue = "0") int pageNumber,
+                                              @RequestParam(defaultValue = "5") int pageSize) {
+        return ok(this.service.findAll(pageNumber, pageSize));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
+        this.service.delete(id);
+        return new ResponseEntity<>(NO_CONTENT);
     }
 }
