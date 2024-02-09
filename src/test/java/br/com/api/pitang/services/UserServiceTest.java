@@ -260,7 +260,7 @@ public class UserServiceTest {
     public void findUserById() {
         when(this.repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(1)));
 
-        UserDTO userDTO = service.findOne(2L);
+        UserDTO userDTO = service.findById(2L);
 
         assertEquals(2L, userDTO.getId());
         assertEquals("Fernando", userDTO.getFirstName());

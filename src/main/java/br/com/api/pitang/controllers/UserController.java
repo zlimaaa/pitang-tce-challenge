@@ -35,8 +35,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> findOne(@PathVariable Long id) {
-        return ok(this.service.findOne(id));
+    public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
+        return ok(this.service.findById(id));
     }
 
     @PutMapping("/{id}")
@@ -47,9 +47,10 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<Page<UserDTO>> findAll(@RequestParam(defaultValue = "0") int pageNumber,
-                                              @RequestParam(defaultValue = "5") int pageSize) {
+                                                 @RequestParam(defaultValue = "5") int pageSize) {
         return ok(this.service.findAll(pageNumber, pageSize));
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
         this.service.delete(id);

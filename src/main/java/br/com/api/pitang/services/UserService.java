@@ -48,7 +48,7 @@ public class UserService {
         return users.map(this::convertEntityToDTO);
     }
 
-    public UserDTO findOne(Long id) {
+    public UserDTO findById(Long id) {
         return convertEntityToDTO(this.repository.findDistinctById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND)));
     }
@@ -65,7 +65,7 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        this.findOne(id);
+        this.findById(id);
         this.repository.deleteById(id);
     }
 
@@ -104,7 +104,7 @@ public class UserService {
     }
 
     private void validateUpdate(User user) {
-        User userSaved = this.convertDTOtoEntity(this.findOne(user.getId()));
+        User userSaved = this.convertDTOtoEntity(this.findById(user.getId()));
 
         if (!isBlank(user.getPassword()))
             user.setPassword(generatePasswordHash(user.getPassword()));
