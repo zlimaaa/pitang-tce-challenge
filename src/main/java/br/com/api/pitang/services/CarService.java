@@ -56,7 +56,7 @@ public class CarService {
 
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        this.validateDelete(id);
+        this.validateUserPermission(id);
         this.repository.deleteById(id);
     }
 
@@ -87,17 +87,17 @@ public class CarService {
     private void validateUpdated(Car car) {
         Car carSaved = this.convertDTOtoEntity(this.findById(car.getId()));
 
-        if (!carSaved.getUser().equals(getUserLogged()))
-            throw new ValidationException(PERMISSION_DENIED);
+        this.validateUserPermission(car.getId());
 
         car.setCreatedAt(carSaved.getCreatedAt());
     }
 
 
-    private void validateDelete(Long id) {
-        Car carSaved = this.convertDTOtoEntity(this.findById(id));
+    private void validateUserPermission(Long id) {
+        Car carSaved = this.repository.findDistinctByIdAndUserId(id, requireNonNull(getUserLogged())
+                .getId()).orElseThrow(() -> new ValidationException(PERMISSION_DENIED));
 
-        if (!carSaved.getUser().equals(getUserLogged()))
+        if (!carSaved.getUser().getId().equals(getUserLogged().getId()))
             throw new ValidationException(PERMISSION_DENIED);
 
     }
