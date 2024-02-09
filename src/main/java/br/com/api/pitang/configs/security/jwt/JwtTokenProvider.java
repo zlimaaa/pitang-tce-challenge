@@ -1,34 +1,33 @@
 package br.com.api.pitang.configs.security.jwt;
 
+import br.com.api.pitang.configs.security.UserDetailService;
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_TOKEN;
-import java.time.LocalDateTime;
-import java.util.Date;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-
+import static br.com.api.pitang.constants.MessagesConstants.UNAUTHORIZED;
 import br.com.api.pitang.data.models.User;
 import br.com.api.pitang.exceptions.AuthenticationJwtException;
+import br.com.api.pitang.exceptions.UnauthorizedException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import static io.jsonwebtoken.Jwts.builder;
+import static io.jsonwebtoken.Jwts.claims;
+import static io.jsonwebtoken.Jwts.parser;
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
+import java.time.LocalDateTime;
+import static java.time.LocalDateTime.now;
+import static java.time.ZoneId.systemDefault;
+import static java.util.Base64.getEncoder;
+import static java.util.Collections.singletonList;
+import java.util.Date;
+import static java.util.Date.from;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import br.com.api.pitang.configs.security.UserDetailService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-
-import static io.jsonwebtoken.Jwts.builder;
-import static io.jsonwebtoken.Jwts.claims;
-import static io.jsonwebtoken.Jwts.parser;
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
-import static java.time.LocalDateTime.now;
-import static java.time.ZoneId.systemDefault;
-import static java.util.Arrays.asList;
-import static java.util.Base64.getEncoder;
-import static java.util.Date.from;
 
 @Service
 public class JwtTokenProvider {
@@ -50,10 +49,10 @@ public class JwtTokenProvider {
 
     public String createToken(User user) {
         Claims claims = claims().setSubject(user.getLogin());
-        claims.put("roles", asList(user.getAuthority()));
+        claims.put("roles", singletonList(user.getAuthority()));
 
         LocalDateTime timeNow = now();
-        LocalDateTime timeExpire = timeNow.plusMinutes(this.tokenExpire);
+        LocalDateTime timeExpire = timeNow.plusMinutes(tokenExpire);
 
         return builder().setClaims(claims)
                 .setIssuedAt(from(timeNow.atZone(systemDefault()).toInstant()))
@@ -63,25 +62,26 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails user = this.service.loadUserByUsername(getLoginUser(token));
+        UserDetails user = service.loadUserByUsername(getLoginUser(token));
         return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
     }
 
     public String getToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        if(token != null && token.startsWith("Bearer "))
-            return token.substring(7, token.length());
 
-        return null;
+        if (isBlank(token))
+            throw new UnauthorizedException(UNAUTHORIZED); //TODO VERIFICAR EXCEPTION HANDLER PARA ESSE CASO
+
+        if(token.startsWith("Bearer "))
+            return token.substring(7);
+
+        return token;
     }
 
     public boolean isValidToken(String token) {
         try {
             Jws<Claims> claims = parser().setSigningKey(key).parseClaimsJws(token);
-            if(claims.getBody().getExpiration().before(new Date()))
-                return false;
-
-            return true;
+            return !claims.getBody().getExpiration().before(new Date());
         }catch(Exception ex) {
             throw new AuthenticationJwtException(INVALID_TOKEN);
         }

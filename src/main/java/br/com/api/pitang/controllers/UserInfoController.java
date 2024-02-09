@@ -23,6 +23,6 @@ public class UserInfoController {
 
     @GetMapping
     public ResponseEntity<UserDTO> userInfo() {
-        return ok(this.service.findById(requireNonNull(getUserLogged()).getId()));
+        return ok(service.findById(requireNonNull(getUserLogged()).getId()));
     }
 }

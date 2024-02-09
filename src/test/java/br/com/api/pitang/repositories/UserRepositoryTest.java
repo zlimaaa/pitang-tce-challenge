@@ -35,7 +35,7 @@ public class UserRepositoryTest {
     @BeforeAll
     @DisplayName("Preparando para iniciar os testes com usuarios salvos no banco")
     public void setUp() {
-        this.user = repository.save(buildUsers().get(0));
+        user = repository.save(buildUsers().get(0));
         repository.save(buildUsers().get(1));
     }
 
@@ -43,7 +43,7 @@ public class UserRepositoryTest {
     @Order(1)
     @DisplayName("Criando usuario")
     public void createUser() {
-       User user = this.repository.save(buildUsers().get(2));
+       User user = repository.save(buildUsers().get(2));
 
         assertNotNull(user.getId());
         assertEquals("Lucas", user.getFirstName());
@@ -59,7 +59,7 @@ public class UserRepositoryTest {
     @Order(2)
     @DisplayName("Consultando usuario pelo id")
     public void findUserById() {
-        User user = this.repository.findDistinctById(this.user.getId()).get();
+        User user = repository.findDistinctById(this.user.getId()).get();
 
         assertEquals(1L, user.getId());
         assertEquals("Ricardo", user.getFirstName());
@@ -75,11 +75,11 @@ public class UserRepositoryTest {
     @Order(3)
     @DisplayName("Contando usuarios pelo email")
     public void countUsersByEmailAndIdNot() {
-        Long countUsers = this.repository.countByEmailAndIdNot(this.user.getEmail(), this.user.getId());
+        Long countUsers = repository.countByEmailAndIdNot(user.getEmail(), user.getId());
 
         assertEquals(0L, countUsers);
 
-        countUsers = this.repository.countByEmailAndIdNot("nando@gmail.com", this.user.getId());
+        countUsers = repository.countByEmailAndIdNot("nando@gmail.com", user.getId());
 
         assertEquals(1L, countUsers);
 
@@ -88,11 +88,11 @@ public class UserRepositoryTest {
     @Order(4)
     @DisplayName("Contando usuarios pelo login")
     public void countUsersByLoginAndIdNot() {
-        Long countUsers = this.repository.countByLoginAndIdNot(this.user.getLogin(), this.user.getId());
+        Long countUsers = repository.countByLoginAndIdNot(user.getLogin(), user.getId());
 
         assertEquals(0L, countUsers);
 
-        countUsers = this.repository.countByLoginAndIdNot("nando01", this.user.getId());
+        countUsers = repository.countByLoginAndIdNot("nando01", user.getId());
 
         assertEquals(1L, countUsers);
     }
@@ -100,7 +100,7 @@ public class UserRepositoryTest {
     @Order(5)
     @DisplayName("Consultando usuario pelo login")
     public void findUserByLogin() {
-        User user = this.repository.findDistinctByLogin(this.user.getLogin()).get();
+        User user = repository.findDistinctByLogin(this.user.getLogin()).get();
 
         assertEquals(1L, user.getId());
         assertEquals("Ricardo", user.getFirstName());
@@ -117,11 +117,11 @@ public class UserRepositoryTest {
     @DisplayName("Atualizando ultimo login do usuario")
     public void updateLastLogin() {
 
-        assertNull(this.user.getLastLogin());
+        assertNull(user.getLastLogin());
 
-        this.repository.updateLastLogin(user.getId(), LocalDateTime.now());
+        repository.updateLastLogin(user.getId(), LocalDateTime.now());
 
-        User user = this.repository.findDistinctById(this.user.getId()).get();
+        User user = repository.findDistinctById(this.user.getId()).get();
 
         assertNotNull(user.getLastLogin());
     }
@@ -130,10 +130,10 @@ public class UserRepositoryTest {
     @Order(7)
     @DisplayName("Deletando usuário")
     public void deleteUserById() {
-        this.repository.deleteById(this.user.getId());
+        repository.deleteById(user.getId());
 
         try {
-            this.repository.findById(this.user.getId()).get();
+            repository.findById(user.getId());
         }catch (Exception ex) {
             assertEquals(NoSuchElementException.class, ex.getClass());
             assertEquals("No value present", ex.getMessage());

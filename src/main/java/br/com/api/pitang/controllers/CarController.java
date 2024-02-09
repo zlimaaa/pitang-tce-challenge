@@ -33,29 +33,29 @@ public class CarController {
 
     @PostMapping
     public ResponseEntity<CarDTO> create(@Valid @RequestBody CarDTO car) {
-        return new ResponseEntity<>(this.service.save(car), CREATED);
+        return new ResponseEntity<>(service.save(car), CREATED);
     }
 
     @GetMapping
     public ResponseEntity<Page<CarDTO>> findAllByUser(@RequestParam(defaultValue = "0") int pageNumber,
                                                       @RequestParam(defaultValue = "5")int pageSize) {
-        return ok(this.service.findAllByUser(pageNumber, pageSize));
+        return ok(service.findAllByUser(pageNumber, pageSize));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CarDTO> update(@PathVariable Long id, @Valid @RequestBody CarDTO car) {
-        return ok(this.service.save(car));
+        return ok(service.save(car));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CarDTO> findById(@PathVariable Long id) {
-        return ok(this.service.findById(id));
+        return ok(service.findById(id));
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
-        this.service.delete(id);
+        service.delete(id);
         return new ResponseEntity<>(NO_CONTENT);
     }
 }

@@ -31,29 +31,29 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO user) {
-        return new ResponseEntity<>(this.service.save(user), CREATED);
+        return new ResponseEntity<>(service.save(user), CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
-        return ok(this.service.findById(id));
+        return ok(service.findById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO user) {
         user.setId(id);
-        return ok(this.service.save(user));
+        return ok(service.save(user));
     }
 
     @GetMapping
     public ResponseEntity<Page<UserDTO>> findAll(@RequestParam(defaultValue = "0") int pageNumber,
                                                  @RequestParam(defaultValue = "5") int pageSize) {
-        return ok(this.service.findAll(pageNumber, pageSize));
+        return ok(service.findAll(pageNumber, pageSize));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {
-        this.service.delete(id);
+        service.delete(id);
         return new ResponseEntity<>(NO_CONTENT);
     }
 }

@@ -75,11 +75,11 @@ public class UserControllerTest {
     @BeforeAll
     @DisplayName("Preparando para iniciar os testes com um usuario salvo no banco e na sessao")
     public void setUp() {
-        this.mockMvc = standaloneSetup(controller).build();
+        mockMvc = standaloneSetup(controller).build();
         User user = buildUsers().get(2);
         user.setCreatedAt(LocalDateTime.now());
-        user = this.repository.save(user);
-        this.userId = user.getId();
+        user = repository.save(user);
+        userId = user.getId();
 
         SecurityContext securityContext = new SecurityContextImpl();
         securityContext.setAuthentication(new TestingAuthenticationToken(new UserDetail(user),null));
@@ -94,7 +94,7 @@ public class UserControllerTest {
         UserDTO userDTO = buildUserDTOs().get(0);
         userDTO.setId(null);
 
-        this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+        mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.firstName").value("Ricardo"))
@@ -113,7 +113,7 @@ public class UserControllerTest {
         UserDTO userDTO = buildUserDTOs().get(2);
         userDTO.setEmail("luquinhas@gmail.com");
 
-        String errorMessage = requireNonNull(this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+        String errorMessage = requireNonNull(mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
 
         assertEquals(EMAIL_ALREADY_EXISTS, errorMessage);
@@ -126,7 +126,7 @@ public class UserControllerTest {
         UserDTO userDTO = buildUserDTOs().get(2);
         userDTO.setEmail("@lui.za");
 
-        String errorMessage = requireNonNull(this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+        String errorMessage = requireNonNull(mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
 
        assertTrue(errorMessage.contains(INVALID_FIELDS));
@@ -139,7 +139,7 @@ public class UserControllerTest {
         UserDTO userDTO = buildUserDTOs().get(2);
         userDTO.setLogin("luquinhas");
 
-        String errorMessage = requireNonNull(this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+        String errorMessage = requireNonNull(mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
 
         assertEquals(LOGIN_ALREADY_EXISTS, errorMessage);
@@ -153,7 +153,7 @@ public class UserControllerTest {
         userDTO.setLogin(" ");
         userDTO.setPhone(null);
 
-        String errorMessage = requireNonNull(this.mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+        String errorMessage = requireNonNull(mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
 
         assertTrue(errorMessage.contains(MISSING_FIELDS));
@@ -161,9 +161,9 @@ public class UserControllerTest {
 
     @Test
     @Order(6)
-    @DisplayName("Consultando usuário pelo id")
+    @DisplayName("Consultando usuario pelo id")
     public void findUser() throws Exception {
-        this.mockMvc.perform(get("/api/users/" + userId))
+        mockMvc.perform(get("/api/users/" + userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId))
                 .andExpect(jsonPath("$.firstName").value("Lucas"))
@@ -181,7 +181,7 @@ public class UserControllerTest {
     public void errorFindUser() {
 
         try {
-            this.mockMvc.perform(get("/api/users/99"))
+            mockMvc.perform(get("/api/users/99"))
                     .andExpect(status().isNotFound());
         } catch (Exception ex) {
             assertEquals(NestedServletException.class, ex.getClass());
@@ -193,7 +193,7 @@ public class UserControllerTest {
     @Order(8)
     @DisplayName("Consultando todos os usuarios")
     public void findAllUsers() throws Exception {
-        this.mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.content.[0].id").value(userId))
@@ -214,7 +214,7 @@ public class UserControllerTest {
         user.setBirthDate(LocalDate.of(1998, 4, 25));
         user.setLastName("Santos");
         UserDTO userDTO = convertObject(user, UserDTO.class);
-        this.mockMvc.perform(put("/api/users/" + userId).contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+        mockMvc.perform(put("/api/users/" + userId).contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId))
                 .andExpect(jsonPath("$.firstName").value("Lucas"))
@@ -230,16 +230,16 @@ public class UserControllerTest {
     @Order(10)
     @DisplayName("Exluindo usuario com sucesso")
     public void deleteUser() throws Exception {
-        this.mockMvc.perform(delete("/api/users/" + userId)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/users/" + userId)).andExpect(status().isNoContent());
 
-        assertTrue(this.repository.findById(userId).isEmpty());
+        assertTrue(repository.findById(userId).isEmpty());
     }
     @Test
     @Order(11)
     @DisplayName("Erro ao excluir usuario inexistente")
     public void deleteUserError() throws Exception {
         try {
-            this.mockMvc.perform(delete("/api/users/99")).andExpect(status().isNotFound());
+            mockMvc.perform(delete("/api/users/99")).andExpect(status().isNotFound());
         } catch (Exception ex) {
             assertEquals(NestedServletException.class, ex.getClass());
             assertTrue(ex.getMessage().contains(USER_NOT_FOUND));

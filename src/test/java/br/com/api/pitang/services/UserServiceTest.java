@@ -57,15 +57,15 @@ public class UserServiceTest {
     @Order(1)
     @DisplayName("Criando um usuario")
     public void createUser() {
-        when(this.repository.countByEmailAndIdNot("ricardo@gmail.com", 0L)).thenReturn(0L);
-        when(this.repository.countByLoginAndIdNot("ricardo", 0L)).thenReturn(0L);
-        when(this.repository.save(any(User.class))).thenReturn(buildUsers().get(0));
+        when(repository.countByEmailAndIdNot("ricardo@gmail.com", 0L)).thenReturn(0L);
+        when(repository.countByLoginAndIdNot("ricardo", 0L)).thenReturn(0L);
+        when(repository.save(any(User.class))).thenReturn(buildUsers().get(0));
 
         UserDTO userDTO = buildUserDTOs().get(0);
         userDTO.setId(null);
         userDTO.setLogin("RicarDo");
 
-        userDTO = this.service.save(userDTO);
+        userDTO = service.save(userDTO);
 
         assertEquals(1L, userDTO.getId());
         assertEquals("Ricardo", userDTO.getFirstName());
@@ -258,7 +258,7 @@ public class UserServiceTest {
     @Order(14)
     @DisplayName("Consultando usuario por id")
     public void findUserById() {
-        when(this.repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(1)));
+        when(repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(1)));
 
         UserDTO userDTO = service.findById(2L);
 
@@ -278,7 +278,7 @@ public class UserServiceTest {
     @Order(15)
     @DisplayName("Consultando usuario por login")
     public void findUserByLogin() {
-        when(this.repository.findDistinctByLogin("nando01")).thenReturn(of(buildUsers().get(1)));
+        when(repository.findDistinctByLogin("nando01")).thenReturn(of(buildUsers().get(1)));
 
         User user = service.findByLogin("nando01");
 
@@ -298,20 +298,20 @@ public class UserServiceTest {
     @Order(16)
     @DisplayName("Deletando usuario por id")
     public void deleteUser() {
-        when(this.repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(1)));
-        doNothing().when(this.repository).deleteById(2L);
+        when(repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(1)));
+        doNothing().when(repository).deleteById(2L);
 
         service.delete(2L);
 
-        verify(this.repository, times(1)).findDistinctById(2L);
-        verify(this.repository, times(1)).deleteById(2L);
+        verify(repository, times(1)).findDistinctById(2L);
+        verify(repository, times(1)).deleteById(2L);
     }
 
     @Test
     @Order(17)
     @DisplayName("Error ao deletar usuario com id inexistente")
     public void deleteUserError() {
-        when(this.repository.findDistinctById(2L)).thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
+        when(repository.findDistinctById(2L)).thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
 
         try{
             service.delete(2L);
@@ -320,8 +320,8 @@ public class UserServiceTest {
             assertEquals(USER_NOT_FOUND, ex.getMessage());
         }
 
-        verify(this.repository, times(1)).findDistinctById(2L);
-        verify(this.repository, times(0)).deleteById(2L);
+        verify(repository, times(1)).findDistinctById(2L);
+        verify(repository, times(0)).deleteById(2L);
     }
 
     @Test
@@ -331,7 +331,7 @@ public class UserServiceTest {
         List<User> users = asList(buildUsers().get(0), buildUsers().get(1));
         Page<User> page = new PageImpl<>(users);
 
-        when(this.repository.findAll(any(Pageable.class))).thenReturn(page);
+        when(repository.findAll(any(Pageable.class))).thenReturn(page);
 
         Page<UserDTO> response = service.findAll(0, 10);
 
@@ -355,17 +355,17 @@ public class UserServiceTest {
         userUpdated.setBirthDate(LocalDate.of(1990,12,15));
         userUpdated.setLastName("Silva");
 
-        when(this.repository.findDistinctById(1L)).thenReturn(of(buildUsers().get(0)));
-        when(this.repository.countByEmailAndIdNot("ricardo@gmail.com", 0L)).thenReturn(0L);
-        when(this.repository.countByLoginAndIdNot("ricardo", 0L)).thenReturn(0L);
-        when(this.repository.save(any(User.class))).thenReturn(userUpdated);
+        when(repository.findDistinctById(1L)).thenReturn(of(buildUsers().get(0)));
+        when(repository.countByEmailAndIdNot("ricardo@gmail.com", 0L)).thenReturn(0L);
+        when(repository.countByLoginAndIdNot("ricardo", 0L)).thenReturn(0L);
+        when(repository.save(any(User.class))).thenReturn(userUpdated);
 
         UserDTO userDTO = buildUserDTOs().get(0);
         userDTO.setBirthDate(LocalDate.of(1990,12,15));
         userDTO.setLastName("Silva");
         userDTO.setPassword(null);
 
-        userDTO = this.service.save(userDTO);
+        userDTO = service.save(userDTO);
 
         assertEquals(1L, userDTO.getId());
         assertEquals("Ricardo", userDTO.getFirstName());

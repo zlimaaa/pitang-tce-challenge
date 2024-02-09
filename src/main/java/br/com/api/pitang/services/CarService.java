@@ -32,32 +32,29 @@ public class CarService {
 
     @Transactional(rollbackFor = Exception.class)
     public CarDTO save(CarDTO carDTO) {
-        Car car = this.convertDTOtoEntity(carDTO);
+        Car car = convertDTOtoEntity(carDTO);
 
-        this.validateFields(car);
-        this.unique(car);
+        validateFields(car);
+        unique(car);
 
-        car = this.repository.save(car);
-        return this.convertEntityToDTO(car);
+        car = repository.save(car);
+        return convertEntityToDTO(car);
     }
 
     public Page<CarDTO> findAllByUser(int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Car> cars = this.repository.findAll(pageable);
+        Page<Car> cars = repository.findAllByUserId(requireNonNull(getUserLogged()).getId(), pageable);
         return cars.map(this::convertEntityToDTO);
     }
 
     public CarDTO findById(Long id) {
-        return this.convertEntityToDTO(
-                this.repository.findDistinctByIdAndUserId(id, requireNonNull(getUserLogged())
-                        .getId()).orElseThrow(() -> new EntityNotFoundException(CAR_NOT_FOUND))
-        );
+        return convertEntityToDTO(getCarIfUserHasPermission(id));
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        this.validateUserPermission(id);
-        this.repository.deleteById(id);
+        getCarIfUserHasPermission(id);
+        repository.deleteById(id);
     }
 
     private void validateFields(Car car) {
@@ -68,13 +65,14 @@ public class CarService {
                 car.getYear() == null)
             throw new ValidationException(MISSING_FIELDS);
 
-        if (!isValidCarYear(car.getYear()))
+        if (!isValidCarYear(car.getYear()) ||
+                car.getLicensePlate().length() != 7)
             throw new ValidationException(INVALID_FIELDS);
 
         if (car.getId() == null)
-            this.validateInsert(car);
+            validateInsert(car);
         else
-            this.validateUpdated(car);
+            validateUpdated(car);
 
         car.setLicensePlate(car.getLicensePlate().toUpperCase());
     }
@@ -85,26 +83,24 @@ public class CarService {
     }
 
     private void validateUpdated(Car car) {
-        Car carSaved = this.convertDTOtoEntity(this.findById(car.getId()));
-
-        this.validateUserPermission(car.getId());
-
+        Car carSaved = getCarIfUserHasPermission(car.getId());
         car.setCreatedAt(carSaved.getCreatedAt());
     }
 
 
-    private void validateUserPermission(Long id) {
-        Car carSaved = this.repository.findDistinctByIdAndUserId(id, requireNonNull(getUserLogged())
-                .getId()).orElseThrow(() -> new ValidationException(PERMISSION_DENIED));
+    private Car getCarIfUserHasPermission(Long id) {
+        Car carSaved = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(CAR_NOT_FOUND));
 
-        if (!carSaved.getUser().getId().equals(getUserLogged().getId()))
+        if (!carSaved.getUser().getId().equals(requireNonNull(getUserLogged()).getId()))
             throw new ValidationException(PERMISSION_DENIED);
 
+        return carSaved;
     }
 
     private void unique(Car car) {
         Long carId = car.getId() == null ? 0L : car.getId();
-        Long count = this.repository.countByLicensePlateAndIdNot(car.getLicensePlate(), carId);
+        Long count = repository.countByLicensePlateAndIdNot(car.getLicensePlate(), carId);
 
         if (count > 0L)
             throw new ValidationException(LICENSE_ALREADY_EXISTS);

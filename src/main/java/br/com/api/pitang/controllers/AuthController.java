@@ -23,6 +23,6 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<Map<Object, Object>> signIn(@Valid @RequestBody AuthDTO authDTO) {
-        return ok(this.service.signIn(authDTO));
+        return ok(service.signIn(authDTO));
     }
 }
