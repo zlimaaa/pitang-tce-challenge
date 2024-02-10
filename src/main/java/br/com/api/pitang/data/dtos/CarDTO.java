@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_NULL)
-@JsonPropertyOrder({ "id", "year", "licensePlate", "model", "color", "user" })
+@JsonPropertyOrder({ "id", "year", "licensePlate", "model", "color" })
 public class CarDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;

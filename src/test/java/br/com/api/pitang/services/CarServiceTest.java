@@ -14,6 +14,7 @@ import static br.com.api.pitang.factory.CarFactory.buildCars;
 import static br.com.api.pitang.factory.CarFactory.buildCarsDTOs;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
 import br.com.api.pitang.repositories.CarRepository;
+import java.time.Year;
 import static java.util.Arrays.asList;
 import java.util.List;
 import static java.util.Optional.of;
@@ -272,14 +273,36 @@ public class CarServiceTest {
         assertEquals("BMW GS 1200", response.getContent().get(1).getModel());
     }
 
+    @Test
+    @Order(14)
+    @DisplayName("Atualizando carro com sucesso")
     public void updateCar() {
+        Car carUpdated = buildCars().get(0);
+        carUpdated.setLicensePlate("PEL7452");
+        carUpdated.setYear(2021);
+
+        when(repository.countByLicensePlateAndIdNot("PEL7452", 1L)).thenReturn(0L);
+        when(repository.findById(1L)).thenReturn(of(buildCars().get(0)));
+        when(repository.save(any(Car.class))).thenReturn(carUpdated);
+
+        CarDTO carDTO = buildCarsDTOs().get(0);
+        carDTO.setLicensePlate("PEL7452");
+        carDTO.setYear(2021);
+
+        carDTO = service.save(carDTO);
+
+        assertEquals(1L, carDTO.getId());
+        assertEquals(2021, carDTO.getYear());
+        assertEquals("Corolla XLS", carDTO.getModel());
+        assertEquals("Preto", carDTO.getColor());
+        assertEquals("PEL7452", carDTO.getLicensePlate());
 
     }
 
     @Test
     @Order(15)
-    @DisplayName("Erro ao deletar carro de outro usario")
-    public void errorUpdateCar() {
+    @DisplayName("Erro ao atualizar carro com id inexistente")
+    public void errorUpdateCarT01() {
         when(repository.findById(1L)).thenThrow(new EntityNotFoundException(CAR_NOT_FOUND));
 
         try{
@@ -290,5 +313,19 @@ public class CarServiceTest {
         }
     }
 
+    @Test
+    @Order(16)
+    @DisplayName("Erro ao atualizar carro com ano invalido")
+    public void errorUpdateCarT02() {
+        CarDTO carDTO = buildCarsDTOs().get(1);
+        carDTO.setYear(Year.now().plusYears(1).getValue());
+
+        try{
+            service.save(carDTO);
+        } catch (Exception ex) {
+            assertEquals(ValidationException.class, ex.getClass());
+            assertEquals(INVALID_FIELDS, ex.getMessage());
+        }
+    }
 
 }

@@ -49,13 +49,13 @@ public class ExceptionMessageCustom extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationJwtException.class)
-    public final ResponseEntity<ExceptionResponse> AuthenticationJwtException(AuthenticationJwtException ex) {
+    public final ResponseEntity<ExceptionResponse> authenticationJwtException(AuthenticationJwtException ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), UNAUTHORIZED.value());
         return new ResponseEntity<>(exceptionResponse, UNAUTHORIZED);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public final ResponseEntity<ExceptionResponse> UnauthorizedException(Exception ex) {
+    public final ResponseEntity<ExceptionResponse> unauthorizedException(Exception ex) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), UNAUTHORIZED.value());
         return new ResponseEntity<>(exceptionResponse, UNAUTHORIZED);
     }
