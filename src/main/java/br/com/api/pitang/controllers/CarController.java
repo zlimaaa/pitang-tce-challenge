@@ -44,6 +44,7 @@ public class CarController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CarDTO> update(@PathVariable Long id, @Valid @RequestBody CarDTO car) {
+        car.setId(id);
         return ok(service.save(car));
     }
 

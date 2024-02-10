@@ -2,16 +2,18 @@ package br.com.api.pitang.controllers;
 
 import br.com.api.pitang.adapters.LocalDateTimeTypeAdapter;
 import br.com.api.pitang.adapters.LocalDateTypeAdapter;
-import br.com.api.pitang.configs.security.UserDetail;
 import static br.com.api.pitang.constants.MessagesConstants.EMAIL_ALREADY_EXISTS;
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_FIELDS;
 import static br.com.api.pitang.constants.MessagesConstants.LOGIN_ALREADY_EXISTS;
 import static br.com.api.pitang.constants.MessagesConstants.MISSING_FIELDS;
 import static br.com.api.pitang.constants.MessagesConstants.USER_NOT_FOUND;
 import br.com.api.pitang.data.dtos.UserDTO;
+import br.com.api.pitang.data.models.Car;
 import br.com.api.pitang.data.models.User;
+import static br.com.api.pitang.factory.CarFactory.buildCars;
 import static br.com.api.pitang.factory.UserFactory.buildUserDTOs;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
+import br.com.api.pitang.repositories.CarRepository;
 import br.com.api.pitang.repositories.UserRepository;
 import static br.com.api.pitang.utils.DozerConverter.convertObject;
 import com.google.gson.Gson;
@@ -33,10 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import static org.springframework.security.core.context.SecurityContextHolder.setContext;
-import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -64,6 +62,9 @@ public class UserControllerTest {
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private CarRepository carRepository;
+
     private Long userId;
 
     private final Gson gson = new GsonBuilder()
@@ -73,7 +74,7 @@ public class UserControllerTest {
             .create();
 
     @BeforeAll
-    @DisplayName("Preparando para iniciar os testes com um usuario salvo no banco e na sessao")
+    @DisplayName("Preparando para iniciar os testes com um usuario salvo no banco")
     public void setUp() {
         mockMvc = standaloneSetup(controller).build();
         User user = buildUsers().get(2);
@@ -81,9 +82,6 @@ public class UserControllerTest {
         user = repository.save(user);
         userId = user.getId();
 
-        SecurityContext securityContext = new SecurityContextImpl();
-        securityContext.setAuthentication(new TestingAuthenticationToken(new UserDetail(user),null));
-        setContext(securityContext);
     }
 
     @Test
@@ -244,6 +242,48 @@ public class UserControllerTest {
             assertEquals(NestedServletException.class, ex.getClass());
             assertTrue(ex.getMessage().contains(USER_NOT_FOUND));
         }
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("Consultando usuario com carros por id ")
+    public void findUserWithCarsById() throws Exception {
+        User user = buildUsers().get(4);
+        user.setCars(null);
+        user = repository.save(user);
+
+        Car car = buildCars().get(3);
+        car.setCreatedAt(LocalDateTime.now());
+        car.setUser(user);
+        carRepository.save(car);
+
+        Car carAux = buildCars().get(4);
+        carAux.setUser(user);
+        carRepository.save(carAux);
+
+        mockMvc.perform(get("/api/users/" + user.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.firstName").value("Otavio"))
+                .andExpect(jsonPath("$.lastName").value("Mendes"))
+                .andExpect(jsonPath("$.birthDate").value("01/02/1979"))
+                .andExpect(jsonPath("$.email").value("otavio-m@gmail.com"))
+                .andExpect(jsonPath("$.login").value("mendes"))
+                .andExpect(jsonPath("$.phone").value("87983772270"))
+                .andExpect(jsonPath("$.cars[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.cars[0].year").value(1986))
+                .andExpect(jsonPath("$.cars[0].model").value("Fusca 1300cc"))
+                .andExpect(jsonPath("$.cars[0].color").value("Azul"))
+                .andExpect(jsonPath("$.cars[0].licensePlate").value("KJP8872"))
+                .andExpect(jsonPath("$.cars[1].id").isNotEmpty())
+                .andExpect(jsonPath("$.cars[1].year").value(2015))
+                .andExpect(jsonPath("$.cars[1].model").value("Toyota Etios Sedan"))
+                .andExpect(jsonPath("$.cars[1].color").value("Prata"))
+                .andExpect(jsonPath("$.cars[1].licensePlate").value("OQA6400"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                .andExpect(jsonPath("$.lastLogin").isNotEmpty());
+
+        repository.deleteById(user.getId());
     }
 
 

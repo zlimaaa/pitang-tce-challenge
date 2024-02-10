@@ -77,6 +77,7 @@ public class UserServiceTest {
         assertEquals("81988775423", userDTO.getPhone());
         assertNotNull(userDTO.getCreatedAt());
         assertNull(userDTO.getLastLogin());
+        assertNull(userDTO.getCars());
     }
 
     @Test
@@ -272,6 +273,7 @@ public class UserServiceTest {
         assertEquals("11989774271", userDTO.getPhone());
         assertNotNull(userDTO.getCreatedAt());
         assertNotNull(userDTO.getLastLogin());
+        assertNull(userDTO.getCars());
     }
 
     @Test
@@ -292,6 +294,7 @@ public class UserServiceTest {
         assertEquals("11989774271", user.getPhone());
         assertNotNull(user.getCreatedAt());
         assertNotNull(user.getLastLogin());
+        assertNull(user.getCars());
     }
 
     @Test
@@ -341,10 +344,12 @@ public class UserServiceTest {
         assertEquals("Ricardo", response.getContent().get(0).getFirstName());
         assertEquals("ricardo@gmail.com", response.getContent().get(0).getEmail());
         assertEquals("81988775423", response.getContent().get(0).getPhone());
+        assertNull(response.getContent().get(0).getCars());
         assertEquals(2L, response.getContent().get(1).getId());
         assertEquals("Fernando", response.getContent().get(1).getFirstName());
         assertEquals("nando@gmail.com", response.getContent().get(1).getEmail());
         assertEquals("11989774271", response.getContent().get(1).getPhone());
+        assertNull(response.getContent().get(1).getCars());
     }
 
     @Test
@@ -377,5 +382,32 @@ public class UserServiceTest {
         assertEquals("81988775423", userDTO.getPhone());
         assertNotNull(userDTO.getCreatedAt());
         assertNull(userDTO.getLastLogin());
+        assertNull(userDTO.getCars());
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("Consultando usuario com carros por id ")
+    public void findUserWithCarById() {
+        when(repository.findDistinctById(5L)).thenReturn(of(buildUsers().get(4)));
+
+        UserDTO userDTO = service.findById(5L);
+
+        assertEquals(5L, userDTO.getId());
+        assertEquals("Otavio", userDTO.getFirstName());
+        assertEquals("Mendes", userDTO.getLastName());
+        assertEquals(LocalDate.of(1979,2,1), userDTO.getBirthDate());
+        assertEquals("otavio-m@gmail.com", userDTO.getEmail());
+        assertEquals("mendes", userDTO.getLogin());
+        assertEquals("$2a$10$A3BtshmFkCkcmWkDLfzA6OoS0xIEVPvc/rh2lbITuzoNqSFHjuizC", userDTO.getPassword());
+        assertEquals("87983772270", userDTO.getPhone());
+        assertNotNull(userDTO.getCreatedAt());
+        assertNotNull(userDTO.getLastLogin());
+        assertNotNull(userDTO.getCars());
+        assertEquals(3L, userDTO.getCars().get(0).getId());
+        assertEquals(2015, userDTO.getCars().get(0).getYear());
+        assertEquals("Prata", userDTO.getCars().get(0).getColor());
+        assertEquals("Toyota Etios Sedan", userDTO.getCars().get(0).getModel());
+        assertEquals("OQA6400", userDTO.getCars().get(0).getLicensePlate());
     }
 }

@@ -48,7 +48,7 @@ public class CarFactory {
                         .color("Prata")
                         .licensePlate("OQA6400")
                         .createdAt(LocalDateTime.now())
-                        .user(User.builder().id(2L).build())
+                        .user(User.builder().id(5L).build())
                         .build()
         );
     }

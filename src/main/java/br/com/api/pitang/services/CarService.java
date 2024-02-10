@@ -85,6 +85,7 @@ public class CarService {
     private void validateUpdated(Car car) {
         Car carSaved = getCarIfUserHasPermission(car.getId());
         car.setCreatedAt(carSaved.getCreatedAt());
+        car.setUser(carSaved.getUser());
     }
 
 

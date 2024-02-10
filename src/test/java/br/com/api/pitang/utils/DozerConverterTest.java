@@ -72,7 +72,7 @@ public class DozerConverterTest {
     public void converterUsersToUserDTOs() {
         List<UserDTO> userDTOs = convertObjects(users, UserDTO.class);
 
-        assertEquals(4, userDTOs.size());
+        assertEquals(5, userDTOs.size());
         assertEquals( 1L, userDTOs.get(0).getId());
         assertEquals( "Ricardo", userDTOs.get(0).getFirstName());
         assertEquals( "Lima", userDTOs.get(0).getLastName());
