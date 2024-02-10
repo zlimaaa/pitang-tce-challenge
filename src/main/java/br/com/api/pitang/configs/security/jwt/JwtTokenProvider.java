@@ -2,10 +2,8 @@ package br.com.api.pitang.configs.security.jwt;
 
 import br.com.api.pitang.configs.security.UserDetailService;
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_TOKEN;
-import static br.com.api.pitang.constants.MessagesConstants.UNAUTHORIZED;
 import br.com.api.pitang.data.models.User;
 import br.com.api.pitang.exceptions.AuthenticationJwtException;
-import br.com.api.pitang.exceptions.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import static io.jsonwebtoken.Jwts.builder;
@@ -69,13 +67,10 @@ public class JwtTokenProvider {
     public String getToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
 
-        if (isBlank(token))
-            throw new UnauthorizedException(UNAUTHORIZED); //TODO VERIFICAR EXCEPTION HANDLER PARA ESSE CASO
-
-        if(token.startsWith("Bearer "))
+        if(!isBlank(token) && token.startsWith("Bearer "))
             return token.substring(7);
 
-        return token;
+        return null;
     }
 
     public boolean isValidToken(String token) {
