@@ -2,12 +2,12 @@ package br.com.api.pitang.factory;
 
 import br.com.api.pitang.data.dtos.UserDTO;
 import br.com.api.pitang.data.models.User;
-
+import static br.com.api.pitang.factory.CarFactory.buildCars;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import java.util.List;
 
 public class UserFactory {
 
@@ -53,6 +53,19 @@ public class UserFactory {
                         .login("marcos")
                         .password("$2a$10$.AfRZpLPQKTq.rRdQjtLNenLvrLKZrllYnZUZZOqlqsZsQ8zVCzde")
                         .phone("87987695672")
+                        .build(),
+                User.builder()
+                        .id(5L)
+                        .firstName("Otavio")
+                        .lastName("Mendes")
+                        .birthDate(LocalDate.of(1979,2,1))
+                        .email("otavio-m@gmail.com")
+                        .login("mendes")
+                        .password("$2a$10$A3BtshmFkCkcmWkDLfzA6OoS0xIEVPvc/rh2lbITuzoNqSFHjuizC")
+                        .phone("87983772270")
+                        .createdAt(LocalDateTime.now())
+                        .lastLogin(LocalDateTime.now())
+                        .cars(singletonList(buildCars().get(4)))
                         .build()
         );
     }

@@ -54,17 +54,17 @@ public class AuthServiceTest {
     @DisplayName("Autenticacao com sucesso")
     public void successSignIn() {
 
-        when(this.authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
-        when(this.userService.findByLogin("ricardo")).thenReturn(of(buildUsers().get(0)).get());
-        when(this.tokenProvider.createToken(any(User.class))).thenReturn("FAKETOKENeyJhbGciOiJIUzI1NiJ9");
-        doNothing().when(this.userService).updateLastLogin(1L);
+        when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(userService.findByLogin("ricardo")).thenReturn(of(buildUsers().get(0)).get());
+        when(tokenProvider.createToken(any(User.class))).thenReturn("FAKETOKENeyJhbGciOiJIUzI1NiJ9");
+        doNothing().when(userService).updateLastLogin(1L);
 
         AuthDTO authDTO = builder()
                 .login("ricardo")
                 .password("00669988")
                 .build();
 
-        Map<Object, Object> response = this.service.signIn(authDTO);
+        Map<Object, Object> response = service.signIn(authDTO);
 
         assertNotNull(response);
         assertEquals("Ricardo", response.get("name"));
@@ -77,15 +77,15 @@ public class AuthServiceTest {
     public void failedSignIn() {
 
         try{
-            when(this.authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
-            when(this.userService.findByLogin("ricardo")).thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
+            when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+            when(userService.findByLogin("ricardo")).thenThrow(new EntityNotFoundException(USER_NOT_FOUND));
 
             AuthDTO authDTO = builder()
                     .login("ricardo")
                     .password("00669988")
                     .build();
 
-            this.service.signIn(authDTO);
+            service.signIn(authDTO);
 
         }catch (Exception ex) {
             assertEquals(EntityNotFoundException.class, ex.getClass());

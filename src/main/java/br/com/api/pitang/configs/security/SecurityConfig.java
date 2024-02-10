@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/api/**").hasAnyAuthority("USER")
                 .anyRequest().denyAll()
-                .and().apply(new JwtConfigurer(this.tokenProvider));
+                .and().apply(new JwtConfigurer(tokenProvider));
     }
 
     @Bean

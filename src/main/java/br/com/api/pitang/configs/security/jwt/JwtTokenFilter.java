@@ -9,6 +9,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.GenericFilterBean;
@@ -28,7 +29,7 @@ public class JwtTokenFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         String token = tokenProvider.getToken((HttpServletRequest) request);
-        if (token != null && tokenProvider.isValidToken(token)) {
+        if (!isBlank(token) && tokenProvider.isValidToken(token)) {
             Authentication auth = tokenProvider.getAuthentication(token);
             if (auth != null)
                 getContext().setAuthentication(auth);

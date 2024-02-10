@@ -8,17 +8,16 @@ import org.springframework.http.HttpStatus;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@RestController
-@ControllerAdvice
+@RestControllerAdvice
 public class ExceptionMessageCustom extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
@@ -43,22 +42,22 @@ public class ExceptionMessageCustom extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
-        String messageError = this.argumentNotValidSimplifiedMessage(ex.getMessage());
+        String messageError = argumentNotValidSimplifiedMessage(ex.getMessage());
 
         ExceptionResponse exceptionResponse = new ExceptionResponse(messageError, BAD_REQUEST.value());
         return new ResponseEntity<>(exceptionResponse, BAD_REQUEST);
     }
 
-    @ExceptionHandler(CustomException.class)
-    public final ResponseEntity<ExceptionResponse> customException(CustomException ex) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(),BAD_REQUEST.value());
-        return new ResponseEntity<>(exceptionResponse, BAD_REQUEST);
+    @ExceptionHandler(AuthenticationJwtException.class)
+    public final ResponseEntity<ExceptionResponse> authenticationJwtException(AuthenticationJwtException ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), UNAUTHORIZED.value());
+        return new ResponseEntity<>(exceptionResponse, UNAUTHORIZED);
     }
 
-    @ExceptionHandler(AuthenticationJwtException.class)
-    public final ResponseEntity<ExceptionResponse> AuthenticationJwtException(AuthenticationJwtException ex) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), BAD_REQUEST.value());
-        return new ResponseEntity<>(exceptionResponse, BAD_REQUEST);
+    @ExceptionHandler(UnauthorizedException.class)
+    public final ResponseEntity<ExceptionResponse> unauthorizedException(Exception ex) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), UNAUTHORIZED.value());
+        return new ResponseEntity<>(exceptionResponse, UNAUTHORIZED);
     }
 
     @ExceptionHandler(ValidationException.class)

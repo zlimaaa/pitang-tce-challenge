@@ -33,40 +33,40 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public UserDTO save(UserDTO userDTO) {
-        User user = this.convertDTOtoEntity(userDTO);
+        User user = convertDTOtoEntity(userDTO);
 
-        this.validateFields(user);
-        this.unique(user);
+        validateFields(user);
+        unique(user);
 
         user = repository.save(user);
-        return this.convertEntityToDTO(user);
+        return convertEntityToDTO(user);
     }
 
     public Page<UserDTO> findAll(int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<User> users =  this.repository.findAll(pageable);
+        Page<User> users =  repository.findAll(pageable);
         return users.map(this::convertEntityToDTO);
     }
 
-    public UserDTO findOne(Long id) {
-        return convertEntityToDTO(this.repository.findDistinctById(id)
+    public UserDTO findById(Long id) {
+        return convertEntityToDTO(repository.findDistinctById(id)
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND)));
     }
 
     public User findByLogin(String login) {
-        return this.repository.findDistinctByLogin(login.toLowerCase())
+        return repository.findDistinctByLogin(login.toLowerCase())
                 .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void updateLastLogin(Long userId) {
-        this.repository.updateLastLogin(userId, now());
+        repository.updateLastLogin(userId, now());
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        this.findOne(id);
-        this.repository.deleteById(id);
+        findById(id);
+        repository.deleteById(id);
     }
 
 
@@ -86,9 +86,9 @@ public class UserService {
             throw new ValidationException(INVALID_FIELDS);
 
         if (user.getId() == null)
-           this.validateInsert(user);
+           validateInsert(user);
         else
-            this.validateUpdate(user);
+            validateUpdate(user);
 
         user.setLogin(user.getLogin().toLowerCase());
         user.setEmail(user.getEmail().toLowerCase());
@@ -104,7 +104,7 @@ public class UserService {
     }
 
     private void validateUpdate(User user) {
-        User userSaved = this.convertDTOtoEntity(this.findOne(user.getId()));
+        User userSaved = convertDTOtoEntity(findById(user.getId()));
 
         if (!isBlank(user.getPassword()))
             user.setPassword(generatePasswordHash(user.getPassword()));

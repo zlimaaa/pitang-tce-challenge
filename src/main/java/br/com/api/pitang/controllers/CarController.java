@@ -1,7 +1,8 @@
 package br.com.api.pitang.controllers;
 
-import br.com.api.pitang.data.dtos.UserDTO;
-import br.com.api.pitang.services.UserService;
+
+import br.com.api.pitang.data.dtos.CarDTO;
+import br.com.api.pitang.services.CarService;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,35 +22,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
-@Api(value = "Users", tags = "Users")
-@RequestMapping("/api/users")
-public class UserController {
+@Api(value = "Cars", tags = "Cars")
+@RequestMapping("/api/cars")
+public class CarController {
 
     @Autowired
-    private UserService service;
+    private CarService service;
 
     @PostMapping
-    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO user) {
-        return new ResponseEntity<>(service.save(user), CREATED);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
-        return ok(service.findById(id));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO user) {
-        user.setId(id);
-        return ok(service.save(user));
+    public ResponseEntity<CarDTO> create(@Valid @RequestBody CarDTO car) {
+        return new ResponseEntity<>(service.save(car), CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> findAll(@RequestParam(defaultValue = "0") int pageNumber,
-                                                 @RequestParam(defaultValue = "5") int pageSize) {
-        return ok(service.findAll(pageNumber, pageSize));
+    public ResponseEntity<Page<CarDTO>> findAllByUser(@RequestParam(defaultValue = "0") int pageNumber,
+                                                      @RequestParam(defaultValue = "5")int pageSize) {
+        return ok(service.findAllByUser(pageNumber, pageSize));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CarDTO> update(@PathVariable Long id, @Valid @RequestBody CarDTO car) {
+        car.setId(id);
+        return ok(service.save(car));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CarDTO> findById(@PathVariable Long id) {
+        return ok(service.findById(id));
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable Long id) {

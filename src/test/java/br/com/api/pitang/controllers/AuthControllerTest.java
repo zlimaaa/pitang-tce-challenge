@@ -61,7 +61,7 @@ public class AuthControllerTest {
         User user = buildUsers().get(3);
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
-        this.mockMvc = standaloneSetup(controller).build();
+        mockMvc = standaloneSetup(controller).build();
     }
 
     @Test
@@ -74,7 +74,7 @@ public class AuthControllerTest {
                 .build();
 
         try {
-            this.mockMvc.
+            mockMvc.
                     perform(post("/api/signin")
                             .contentType(APPLICATION_JSON)
                             .content(gson.toJson(dto)))
@@ -90,7 +90,7 @@ public class AuthControllerTest {
     @Order(2)
     @DisplayName("Criando autenticação com sucesso e validando update do ultimo login")
     public void createAuthAndVerifyLastLogin() throws Exception {
-        User user = this.userService.findByLogin("marcos");
+        User user = userService.findByLogin("marcos");
         assertNull(user.getLastLogin());
 
         AuthDTO dto = builder()
@@ -98,7 +98,7 @@ public class AuthControllerTest {
                 .password("18855698")
                 .build();
 
-        this.mockMvc.
+        mockMvc.
                 perform(post("/api/signin")
                         .contentType(APPLICATION_JSON)
                         .content(gson.toJson(dto)))
@@ -106,7 +106,7 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("$.name").value("Marcos"))
                 .andExpect(jsonPath("$.token").isNotEmpty());
 
-        user = this.userService.findByLogin("marcos");
+        user = userService.findByLogin("marcos");
         assertNotNull(user.getLastLogin());
     }
 
@@ -119,7 +119,7 @@ public class AuthControllerTest {
                 .password("18855698")
                 .build();
 
-        this.mockMvc.
+        mockMvc.
                 perform(post("/api/signin")
                         .contentType(APPLICATION_JSON)
                         .content(gson.toJson(dto)))
@@ -131,9 +131,9 @@ public class AuthControllerTest {
     @AfterAll
     @DisplayName("Deletando o usario criado no banco de dados")
     public void deleteUserAfterFinishTests(){
-       this.userRepository.findDistinctByLogin("marcos")
+       userRepository.findDistinctByLogin("marcos")
                .ifPresent(
-                       u -> this.userRepository.deleteById(u.getId())
+                       u -> userRepository.deleteById(u.getId())
                );
     }
 }

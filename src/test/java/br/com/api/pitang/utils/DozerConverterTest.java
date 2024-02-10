@@ -36,7 +36,7 @@ public class DozerConverterTest {
     @Test
     @DisplayName("Convertendo um usuário DTO para um usuário ")
     public void converterUserDTOtoUser() {
-        User user = convertObject(this.userDTO, User.class);
+        User user = convertObject(userDTO, User.class);
 
         assertEquals(3L, user.getId());
         assertEquals("Ana", user.getFirstName());
@@ -53,7 +53,7 @@ public class DozerConverterTest {
     @Test
     @DisplayName("Convertendo um usuário para um usuário DTO")
     public void converterUserToUserDTO() {
-        UserDTO userDTO = convertObject(this.user, UserDTO.class);
+        UserDTO userDTO = convertObject(user, UserDTO.class);
 
         assertEquals(1L, userDTO.getId());
         assertEquals("Ricardo", userDTO.getFirstName());
@@ -70,9 +70,9 @@ public class DozerConverterTest {
     @Test
     @DisplayName("Convertendo uma lista de usuários para uma lista de usuários DTOs")
     public void converterUsersToUserDTOs() {
-        List<UserDTO> userDTOs = convertObjects(this.users, UserDTO.class);
+        List<UserDTO> userDTOs = convertObjects(users, UserDTO.class);
 
-        assertEquals(4, userDTOs.size());
+        assertEquals(5, userDTOs.size());
         assertEquals( 1L, userDTOs.get(0).getId());
         assertEquals( "Ricardo", userDTOs.get(0).getFirstName());
         assertEquals( "Lima", userDTOs.get(0).getLastName());
@@ -101,7 +101,7 @@ public class DozerConverterTest {
     @Test
     @DisplayName("Convertendo uma lista de usuários DTOs para uma lista de usuários")
     public void converterUserDTOsToUsers() {
-        List<User> users = convertObjects(this.userDTOs, User.class);
+        List<User> users = convertObjects(userDTOs, User.class);
 
         assertEquals(3, users.size());
         assertEquals( 1L, users.get(0).getId());
