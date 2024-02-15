@@ -451,7 +451,7 @@ public class UserServiceTest {
     @Test
     @Order(22)
     @DisplayName("Erro ao atualizar usuario com senha invalida")
-    public void errorCreatingUserT14() {
+    public void errorUpdateUser() {
         UserDTO userDTO = buildUserDTOs().get(2);
         userDTO.setId(2L);
         userDTO.setPassword("12345");
