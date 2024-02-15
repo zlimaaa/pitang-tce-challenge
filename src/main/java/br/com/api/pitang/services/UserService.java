@@ -45,7 +45,7 @@ public class UserService {
 
     public Page<UserDTO> findAll(int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<User> users = repository.findAll(pageable);
+        Page<User> users = repository.findAllUsersOrderByTotalUsageCounterAndLoginPage(pageable);
         return users.map(this::convertEntityToDTO);
     }
 
