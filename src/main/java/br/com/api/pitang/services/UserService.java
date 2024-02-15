@@ -13,6 +13,7 @@ import static br.com.api.pitang.utils.DozerConverter.convertObject;
 import static br.com.api.pitang.utils.GenericUtils.generatePasswordHash;
 import static br.com.api.pitang.utils.GenericUtils.isValidEmail;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import static java.time.LocalDateTime.now;
 import javax.persistence.EntityNotFoundException;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,6 +134,12 @@ public class UserService {
 
     private UserDTO convertEntityToDTO(User user) {
         return convertObject(user, UserDTO.class);
+    }
+
+    @Scheduled(cron = "${spring.task.scheduling.cron}")
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteInactiveUsers() {
+        repository.deleteInactiveUsers(LocalDateTime.now().minusDays(30));
     }
 
 }

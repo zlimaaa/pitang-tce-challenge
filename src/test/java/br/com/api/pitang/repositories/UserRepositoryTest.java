@@ -35,7 +35,9 @@ public class UserRepositoryTest {
     @BeforeAll
     @DisplayName("Preparando para iniciar os testes com usuarios salvos no banco")
     public void setUp() {
-        user = repository.save(buildUsers().get(0));
+        User userAux = buildUsers().get(0);
+        userAux.setCreatedAt(LocalDateTime.now().minusWeeks(5));
+        user = repository.save(userAux);
         repository.save(buildUsers().get(1));
     }
 
@@ -128,7 +130,7 @@ public class UserRepositoryTest {
 
     @Test
     @Order(7)
-    @DisplayName("Deletando usuário")
+    @DisplayName("Deletando usuario")
     public void deleteUserById() {
         repository.deleteById(user.getId());
 
@@ -138,5 +140,33 @@ public class UserRepositoryTest {
             assertEquals(NoSuchElementException.class, ex.getClass());
             assertEquals("No value present", ex.getMessage());
         }
+    }
+
+
+    @Test
+    @Order(8)
+    @DisplayName("Deletando usuarios inativos")
+    public void deleteInactiveUsers() {
+
+        Long countUsers = repository.count();
+        assertEquals(2, countUsers);
+
+        User userOne = buildUsers().get(2);
+        userOne.setCreatedAt(LocalDateTime.now().minusDays(31));
+
+        User userTwo = buildUsers().get(3);
+        userTwo.setCreatedAt(LocalDateTime.now().minusDays(31));
+        userTwo.setLastLogin(LocalDateTime.now().minusDays(30));
+
+        repository.save(userOne);
+        repository.save(userTwo);
+
+        countUsers = repository.count();
+        assertEquals(4, countUsers);
+
+        repository.deleteInactiveUsers(LocalDateTime.now().minusDays(30));
+
+        countUsers = repository.count();
+        assertEquals(1, countUsers);
     }
 }

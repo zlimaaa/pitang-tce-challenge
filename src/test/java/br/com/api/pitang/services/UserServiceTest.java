@@ -12,6 +12,7 @@ import static br.com.api.pitang.factory.UserFactory.buildUserDTOs;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
 import br.com.api.pitang.repositories.UserRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import static java.util.Arrays.asList;
 import java.util.List;
 import static java.util.Optional.of;
@@ -409,5 +410,17 @@ public class UserServiceTest {
         assertEquals("Prata", userDTO.getCars().get(0).getColor());
         assertEquals("Toyota Etios Sedan", userDTO.getCars().get(0).getModel());
         assertEquals("OQA-6400", userDTO.getCars().get(0).getLicensePlate());
+    }
+
+
+    @Test
+    @Order(20)
+    @DisplayName("deletando usuarios inativos por schedule")
+    public void deleteInactiveUsers() {
+        doNothing().when(repository).deleteInactiveUsers(any(LocalDateTime.class));
+
+        service.deleteInactiveUsers();
+
+        verify(repository, times(1)).deleteInactiveUsers(any(LocalDateTime.class));
     }
 }

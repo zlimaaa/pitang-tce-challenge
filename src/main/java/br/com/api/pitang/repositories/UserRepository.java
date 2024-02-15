@@ -19,4 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void updateLastLogin(@Param(value = "id") Long id,
                          @Param(value = "lastLogin") LocalDateTime lastLogin);
 
+    @Modifying
+    @Query("delete from User u where coalesce(u.lastLogin, u.createdAt) < :deadline")
+    void deleteInactiveUsers(@Param(value = "deadline") LocalDateTime deadline);
+
 }
