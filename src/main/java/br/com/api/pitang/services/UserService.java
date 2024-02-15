@@ -11,16 +11,22 @@ import br.com.api.pitang.exceptions.ValidationException;
 import br.com.api.pitang.repositories.UserRepository;
 import static br.com.api.pitang.utils.DozerConverter.convertObject;
 import static br.com.api.pitang.utils.GenericUtils.generatePasswordHash;
+import static br.com.api.pitang.utils.GenericUtils.getUserLogged;
 import static br.com.api.pitang.utils.GenericUtils.isValidEmail;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import static java.time.LocalDateTime.now;
+import static java.util.Objects.requireNonNull;
 import javax.persistence.EntityNotFoundException;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +50,9 @@ public class UserService {
     }
 
     public Page<UserDTO> findAll(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<User> users = repository.findAllUsersOrderByTotalUsageCounterAndLoginPage(pageable);
+        Sort sort = by(desc("totalUsageCounter"), asc("login"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<User> users = repository.findAll(pageable);
         return users.map(this::convertEntityToDTO);
     }
 
@@ -118,6 +125,7 @@ public class UserService {
 
         user.setCreatedAt(now());
         user.setPassword(generatePasswordHash(user.getPassword()));
+        user.setTotalUsageCounter(0L);
     }
 
     /**
@@ -139,6 +147,7 @@ public class UserService {
 
         user.setCreatedAt(userSaved.getCreatedAt());
         user.setLastLogin(userSaved.getLastLogin());
+        user.setTotalUsageCounter(userSaved.getTotalUsageCounter());
     }
 
     /**
@@ -174,6 +183,12 @@ public class UserService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteInactiveUsers() {
         repository.deleteInactiveUsers(LocalDateTime.now().minusDays(30));
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateTotalUsageCounter() {
+       repository.updateTotalUsageCounter(requireNonNull(getUserLogged()).getId());
     }
 
 }
