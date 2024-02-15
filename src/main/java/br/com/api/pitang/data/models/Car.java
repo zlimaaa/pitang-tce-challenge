@@ -60,4 +60,6 @@ public class Car implements Serializable {
     @JsonFormat(shape = STRING, pattern = "dd/MM/yyyy HH:mm:ss.SSS")
     private LocalDateTime createdAt;
 
+    @Column(name = "usage_counter")
+    private Long usageCounter;
 }

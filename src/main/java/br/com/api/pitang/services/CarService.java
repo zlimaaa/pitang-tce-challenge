@@ -20,6 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +32,6 @@ public class CarService {
 
     @Autowired
     private CarRepository repository;
-
 
     @Transactional(rollbackFor = Exception.class)
     public CarDTO save(CarDTO carDTO) {
@@ -42,7 +45,8 @@ public class CarService {
     }
 
     public Page<CarDTO> findAllByUser(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Sort sort = by(desc("usageCounter"), asc("model"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<Car> cars = repository.findAllByUserId(requireNonNull(getUserLogged()).getId(), pageable);
         return cars.map(this::convertEntityToDTO);
     }
@@ -86,12 +90,14 @@ public class CarService {
     private void validateInsert(Car car) {
         car.setCreatedAt(LocalDateTime.now());
         car.setUser(getUserLogged());
+        car.setUsageCounter(0L);
     }
 
     private void validateUpdated(Car car) {
         Car carSaved = getCarIfUserHasPermission(car.getId());
         car.setCreatedAt(carSaved.getCreatedAt());
         car.setUser(carSaved.getUser());
+        car.setUsageCounter(carSaved.getUsageCounter());
     }
 
     /**
@@ -127,6 +133,11 @@ public class CarService {
     private boolean isValidCarYear(Integer year) {
         int currentYear = Year.now().getValue();
         return year >= 1885 && year <= currentYear;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUsageCounter(Long carId) {
+        repository.updateUsageCounter(carId, requireNonNull(getUserLogged()).getId());
     }
 
     private Car convertDTOtoEntity(CarDTO carDTO) {
