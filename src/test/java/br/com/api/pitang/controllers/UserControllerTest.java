@@ -192,18 +192,31 @@ public class UserControllerTest {
     @DisplayName("Consultando todos os usuarios")
     public void findAllUsers() throws Exception {
 
+        User userTwo = buildUsers().get(3);
+        userTwo.setCreatedAt(LocalDateTime.now());
+        userTwo.setTotalUsageCounter(12L);
+        userTwo = repository.save(userTwo);
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.content.[0].id").value(userId))
-                .andExpect(jsonPath("$.content.[0].firstName").value("Lucas"))
-                .andExpect(jsonPath("$.content.[0].lastName").value("Filho"))
-                .andExpect(jsonPath("$.content.[0].birthDate").value("11/11/2000"))
-                .andExpect(jsonPath("$.content.[0].email").value("luquinhas@gmail.com"))
-                .andExpect(jsonPath("$.content.[0].login").value("luquinhas"))
-                .andExpect(jsonPath("$.content.[0].phone").value("21988826756"))
-                .andExpect(jsonPath("$.content.[0].createdAt").isNotEmpty());
+                .andExpect(jsonPath("$.content.[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].firstName").value("Marcos"))
+                .andExpect(jsonPath("$.content.[0].lastName").value("Pontes"))
+                .andExpect(jsonPath("$.content.[0].birthDate").value("30/10/1980"))
+                .andExpect(jsonPath("$.content.[0].email").value("marcos@gmail.com"))
+                .andExpect(jsonPath("$.content.[0].login").value("marcos"))
+                .andExpect(jsonPath("$.content.[0].phone").value("87987695672"))
+                .andExpect(jsonPath("$.content.[1].id").value(userId))
+                .andExpect(jsonPath("$.content.[1].firstName").value("Lucas"))
+                .andExpect(jsonPath("$.content.[1].lastName").value("Filho"))
+                .andExpect(jsonPath("$.content.[1].birthDate").value("11/11/2000"))
+                .andExpect(jsonPath("$.content.[1].email").value("luquinhas@gmail.com"))
+                .andExpect(jsonPath("$.content.[1].login").value("luquinhas"))
+                .andExpect(jsonPath("$.content.[1].phone").value("21988826756"))
+                .andExpect(jsonPath("$.content.[1].createdAt").isNotEmpty());
+
+        repository.deleteById(userTwo.getId());
     }
 
     @Test
