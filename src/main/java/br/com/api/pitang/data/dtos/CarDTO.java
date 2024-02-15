@@ -33,7 +33,7 @@ public class CarDTO implements Serializable {
 
     @NotNull(message = MISSING_FIELDS)
     @NotEmpty(message = MISSING_FIELDS)
-    @Size(min = 7, max = 7, message = INVALID_FIELDS)
+    @Size(min = 8, max = 8, message = INVALID_FIELDS)
     private String licensePlate;
 
     @NotNull(message = MISSING_FIELDS)

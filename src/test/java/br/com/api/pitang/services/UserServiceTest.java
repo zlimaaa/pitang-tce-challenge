@@ -408,6 +408,6 @@ public class UserServiceTest {
         assertEquals(2015, userDTO.getCars().get(0).getYear());
         assertEquals("Prata", userDTO.getCars().get(0).getColor());
         assertEquals("Toyota Etios Sedan", userDTO.getCars().get(0).getModel());
-        assertEquals("OQA6400", userDTO.getCars().get(0).getLicensePlate());
+        assertEquals("OQA-6400", userDTO.getCars().get(0).getLicensePlate());
     }
 }

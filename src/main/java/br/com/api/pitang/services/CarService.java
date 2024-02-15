@@ -66,7 +66,7 @@ public class CarService {
             throw new ValidationException(MISSING_FIELDS);
 
         if (!isValidCarYear(car.getYear()) ||
-                car.getLicensePlate().length() != 7)
+                car.getLicensePlate().length() != 8)
             throw new ValidationException(INVALID_FIELDS);
 
         if (car.getId() == null)

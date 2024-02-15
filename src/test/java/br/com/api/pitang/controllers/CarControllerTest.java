@@ -106,7 +106,7 @@ public class CarControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.year").value(1998))
-                .andExpect(jsonPath("$.licensePlate").value("WXY0935"))
+                .andExpect(jsonPath("$.licensePlate").value("WXY-0935"))
                 .andExpect(jsonPath("$.color").value("Preto"))
                 .andExpect(jsonPath("$.model").value("Celta"));
     }
@@ -116,7 +116,7 @@ public class CarControllerTest {
     @DisplayName("Erro ao criar carro com placa existente")
     public void errorCreatingCarT01() throws Exception {
         CarDTO carDTO = buildCarsDTOs().get(3);
-        carDTO.setLicensePlate("KJP8872");
+        carDTO.setLicensePlate("KJP-8872");
 
         String errorMessage = requireNonNull(mockMvc.perform(post("/api/cars").contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
@@ -129,7 +129,7 @@ public class CarControllerTest {
     @DisplayName("Erro ao criar carro com placa invalida")
     public void errorCreatingCarT02() throws Exception {
         CarDTO carDTO = buildCarsDTOs().get(3);
-        carDTO.setLicensePlate("KJP882");
+        carDTO.setLicensePlate("KJP-882");
 
         String errorMessage = requireNonNull(mockMvc.perform(post("/api/cars").contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
@@ -198,7 +198,7 @@ public class CarControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.content.[0].id").value(carId))
                 .andExpect(jsonPath("$.content.[0].year").value(1986))
-                .andExpect(jsonPath("$.content.[0].licensePlate").value("KJP8872"))
+                .andExpect(jsonPath("$.content.[0].licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.content.[0].color").value("Azul"))
                 .andExpect(jsonPath("$.content.[0].model").value("Fusca 1300cc"));
     }
@@ -211,7 +211,7 @@ public class CarControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(carId))
                 .andExpect(jsonPath("$.year").value(1986))
-                .andExpect(jsonPath("$.licensePlate").value("KJP8872"))
+                .andExpect(jsonPath("$.licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.color").value("Azul"))
                 .andExpect(jsonPath("$.model").value("Fusca 1300cc"));
     }
@@ -221,7 +221,7 @@ public class CarControllerTest {
     @DisplayName("Atualizando carro do usario logado com sucesso")
     public void updateCar() throws Exception {
         Car car = buildCars().get(3);
-        car.setLicensePlate("KKK0287");
+        car.setLicensePlate("KKK-0287");
         car.setColor("Roxo");
 
         CarDTO carDTO = convertObject(car, CarDTO.class);
@@ -230,7 +230,7 @@ public class CarControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(carId))
                 .andExpect(jsonPath("$.year").value(1986))
-                .andExpect(jsonPath("$.licensePlate").value("KKK0287"))
+                .andExpect(jsonPath("$.licensePlate").value("KKK-0287"))
                 .andExpect(jsonPath("$.color").value("Roxo"))
                 .andExpect(jsonPath("$.model").value("Fusca 1300cc"));
     }
@@ -240,7 +240,7 @@ public class CarControllerTest {
     @DisplayName("Erro ao atualizar carro com id inexistente")
     public void errorUpdateCar() throws Exception {
         Car car = buildCars().get(3);
-        car.setLicensePlate("KKK0287");
+        car.setLicensePlate("KKK-0287");
         car.setColor("Roxo");
 
         CarDTO carDTO = convertObject(car, CarDTO.class);

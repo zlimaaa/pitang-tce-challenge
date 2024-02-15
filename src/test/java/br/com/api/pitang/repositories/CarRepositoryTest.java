@@ -57,7 +57,7 @@ public class CarRepositoryTest {
         assertEquals(2008, car.getYear());
         assertEquals("Uno Miller", car.getModel());
         assertEquals("Vermelho", car.getColor());
-        assertEquals("GHF6292", car.getLicensePlate());
+        assertEquals("GHF-6292", car.getLicensePlate());
         assertNotNull(car.getCreatedAt());
     }
 
@@ -69,7 +69,7 @@ public class CarRepositoryTest {
 
         assertEquals(0L, countCars);
 
-        countCars = repository.countByLicensePlateAndIdNot("PTG7622", car.getId());
+        countCars = repository.countByLicensePlateAndIdNot("PTG-7622", car.getId());
 
         assertEquals(1L, countCars);
     }
@@ -85,7 +85,7 @@ public class CarRepositoryTest {
         assertEquals(2024, car.getYear());
         assertEquals("Corolla XLS", car.getModel());
         assertEquals("Preto", car.getColor());
-        assertEquals("PLK6721", car.getLicensePlate());
+        assertEquals("PLK-6721", car.getLicensePlate());
         assertNotNull(car.getCreatedAt());
     }
 

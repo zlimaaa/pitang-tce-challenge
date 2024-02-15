@@ -274,12 +274,12 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.cars[0].year").value(1986))
                 .andExpect(jsonPath("$.cars[0].model").value("Fusca 1300cc"))
                 .andExpect(jsonPath("$.cars[0].color").value("Azul"))
-                .andExpect(jsonPath("$.cars[0].licensePlate").value("KJP8872"))
+                .andExpect(jsonPath("$.cars[0].licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.cars[1].id").isNotEmpty())
                 .andExpect(jsonPath("$.cars[1].year").value(2015))
                 .andExpect(jsonPath("$.cars[1].model").value("Toyota Etios Sedan"))
                 .andExpect(jsonPath("$.cars[1].color").value("Prata"))
-                .andExpect(jsonPath("$.cars[1].licensePlate").value("OQA6400"))
+                .andExpect(jsonPath("$.cars[1].licensePlate").value("OQA-6400"))
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.lastLogin").isNotEmpty());
 
