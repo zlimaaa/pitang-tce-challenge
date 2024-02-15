@@ -412,7 +412,6 @@ public class UserServiceTest {
         assertEquals("OQA-6400", userDTO.getCars().get(0).getLicensePlate());
     }
 
-
     @Test
     @Order(20)
     @DisplayName("deletando usuarios inativos por schedule")
@@ -423,4 +422,38 @@ public class UserServiceTest {
 
         verify(repository, times(1)).deleteInactiveUsers(any(LocalDateTime.class));
     }
+
+    @Test
+    @Order(21)
+    @DisplayName("Erro ao criar usuario com senha invalida")
+    public void errorCreatingUserT13() {
+        UserDTO userDTO = buildUserDTOs().get(2);
+        userDTO.setPassword("12345");
+
+        try {
+            service.save(userDTO);
+        } catch (Exception ex) {
+            assertEquals(ValidationException.class, ex.getClass());
+            assertEquals(INVALID_FIELDS, ex.getMessage());
+        }
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("Erro ao atualizar usuario com senha invalida")
+    public void errorCreatingUserT14() {
+        UserDTO userDTO = buildUserDTOs().get(2);
+        userDTO.setId(2L);
+        userDTO.setPassword("12345");
+
+        when(repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(0)));
+
+        try {
+            service.save(userDTO);
+        } catch (Exception ex) {
+            assertEquals(ValidationException.class, ex.getClass());
+            assertEquals(INVALID_FIELDS, ex.getMessage());
+        }
+    }
+
 }

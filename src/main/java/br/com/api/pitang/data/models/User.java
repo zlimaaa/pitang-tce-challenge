@@ -73,7 +73,7 @@ public class User implements GrantedAuthority {
     @JsonFormat(shape = STRING, pattern = "dd/MM/yyyy HH:mm:ss.SSS")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Car> cars;
 
     @Override

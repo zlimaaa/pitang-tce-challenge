@@ -226,6 +226,20 @@ public class UserControllerTest {
 
     @Test
     @Order(10)
+    @DisplayName("Erro ao atualizar usuario com senha invalida")
+    public void errorUpdateUser() throws Exception {
+        UserDTO userDTO = buildUserDTOs().get(0);
+        userDTO.setId(userId);
+        userDTO.setPassword("12345");
+
+        String errorMessage = requireNonNull(mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+                .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
+
+        assertTrue(errorMessage.contains(INVALID_FIELDS));
+    }
+
+    @Test
+    @Order(11)
     @DisplayName("Exluindo usuario com sucesso")
     public void deleteUser() throws Exception {
         mockMvc.perform(delete("/api/users/" + userId)).andExpect(status().isNoContent());
@@ -233,7 +247,7 @@ public class UserControllerTest {
         assertTrue(repository.findById(userId).isEmpty());
     }
     @Test
-    @Order(11)
+    @Order(12)
     @DisplayName("Erro ao excluir usuario inexistente")
     public void deleteUserError() throws Exception {
         try {
@@ -245,7 +259,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     @DisplayName("Consultando usuario com carros por id ")
     public void findUserWithCarsById() throws Exception {
         User user = buildUsers().get(4);
@@ -285,6 +299,5 @@ public class UserControllerTest {
 
         repository.deleteById(user.getId());
     }
-
 
 }

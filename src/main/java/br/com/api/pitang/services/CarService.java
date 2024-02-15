@@ -57,6 +57,12 @@ public class CarService {
         repository.deleteById(id);
     }
 
+    /**
+     * validacao de campos vazio: licensePlate, model, color, year
+     * validacao de campos invalidos: year (menor que 1885 ou ano futuro), licensePlate (TCE-2024)
+     * @param car
+     * @throws ValidationException caso falhe em alguma das verificacoes acima
+     */
     private void validateFields(Car car) {
 
         if (isBlank(car.getLicensePlate()) ||
@@ -88,7 +94,12 @@ public class CarService {
         car.setUser(carSaved.getUser());
     }
 
-
+    /**
+     * procura um carro pelo id e caso o encontre, valida se o carro encontradado
+     * pertence ao usuario logado
+     * @param id
+     * @return Car  caso o carro encontrado pertenca ao usuario logado
+     */
     private Car getCarIfUserHasPermission(Long id) {
         Car carSaved = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(CAR_NOT_FOUND));
@@ -99,6 +110,12 @@ public class CarService {
         return carSaved;
     }
 
+    /**
+     * validacao de unicidade da placa do carro, verificando se a placa
+     * ja existe no banco, mesmo que pertencendo a outro usuario
+     * @param car
+     * @throws ValidationException caso haja outro carro com a mesma placa
+     */
     private void unique(Car car) {
         Long carId = car.getId() == null ? 0L : car.getId();
         Long count = repository.countByLicensePlateAndIdNot(car.getLicensePlate(), carId);

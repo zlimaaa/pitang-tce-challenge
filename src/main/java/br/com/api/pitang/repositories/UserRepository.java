@@ -19,6 +19,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void updateLastLogin(@Param(value = "id") Long id,
                          @Param(value = "lastLogin") LocalDateTime lastLogin);
 
+    /**
+     * query para deletar os usuarios inativos a mais de 30 dias,
+     * serao deletados os usuarios que estao a mais de 30 dias sem fazer login
+     * ou os usuario que nunca fizeram login e a data de criacao tem mais de 30 dias
+     * @param deadline
+     */
     @Modifying
     @Query("delete from User u where coalesce(u.lastLogin, u.createdAt) < :deadline")
     void deleteInactiveUsers(@Param(value = "deadline") LocalDateTime deadline);

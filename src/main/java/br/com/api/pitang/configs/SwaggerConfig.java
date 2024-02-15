@@ -46,8 +46,8 @@ public class SwaggerConfig {
         return new ArrayList<ResponseMessage>() {
             private static final long serialVersionUID = 1L;
             {
-                add(new ResponseMessageBuilder().code(500).message(INTERNAL_SERVER_ERROR.getReasonPhrase()).build());
-                add(new ResponseMessageBuilder().code(400).message(BAD_REQUEST.getReasonPhrase()).build());
+                add(new ResponseMessageBuilder().code(INTERNAL_SERVER_ERROR.value()).message(INTERNAL_SERVER_ERROR.getReasonPhrase()).build());
+                add(new ResponseMessageBuilder().code(BAD_REQUEST.value()).message(BAD_REQUEST.getReasonPhrase()).build());
             }
         };
     }
