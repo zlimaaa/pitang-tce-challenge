@@ -1,5 +1,6 @@
 package br.com.api.pitang.services;
 
+import br.com.api.pitang.configs.security.UserDetail;
 import static br.com.api.pitang.constants.MessagesConstants.EMAIL_ALREADY_EXISTS;
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_FIELDS;
 import static br.com.api.pitang.constants.MessagesConstants.LOGIN_ALREADY_EXISTS;
@@ -12,6 +13,7 @@ import static br.com.api.pitang.factory.UserFactory.buildUserDTOs;
 import static br.com.api.pitang.factory.UserFactory.buildUsers;
 import br.com.api.pitang.repositories.UserRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import static java.util.Arrays.asList;
 import java.util.List;
 import static java.util.Optional.of;
@@ -37,7 +39,15 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import static org.springframework.security.core.context.SecurityContextHolder.setContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -334,7 +344,8 @@ public class UserServiceTest {
         List<User> users = asList(buildUsers().get(0), buildUsers().get(1));
         Page<User> page = new PageImpl<>(users);
 
-        when(repository.findAll(any(Pageable.class))).thenReturn(page);
+        Sort sort =  by(desc("totalUsageCounter"), asc("login"));
+        when(repository.findAll(PageRequest.of(0, 10, sort))).thenReturn(page);
 
         Page<UserDTO> response = service.findAll(0, 10);
 
@@ -408,6 +419,66 @@ public class UserServiceTest {
         assertEquals(2015, userDTO.getCars().get(0).getYear());
         assertEquals("Prata", userDTO.getCars().get(0).getColor());
         assertEquals("Toyota Etios Sedan", userDTO.getCars().get(0).getModel());
-        assertEquals("OQA6400", userDTO.getCars().get(0).getLicensePlate());
+        assertEquals("OQA-6400", userDTO.getCars().get(0).getLicensePlate());
     }
+
+    @Test
+    @Order(20)
+    @DisplayName("deletando usuarios inativos por schedule")
+    public void deleteInactiveUsers() {
+        doNothing().when(repository).deleteInactiveUsers(any(LocalDateTime.class));
+
+        service.deleteInactiveUsers();
+
+        verify(repository, times(1)).deleteInactiveUsers(any(LocalDateTime.class));
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("Erro ao criar usuario com senha invalida")
+    public void errorCreatingUserT13() {
+        UserDTO userDTO = buildUserDTOs().get(2);
+        userDTO.setPassword("12345");
+
+        try {
+            service.save(userDTO);
+        } catch (Exception ex) {
+            assertEquals(ValidationException.class, ex.getClass());
+            assertEquals(INVALID_FIELDS, ex.getMessage());
+        }
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("Erro ao atualizar usuario com senha invalida")
+    public void errorUpdateUser() {
+        UserDTO userDTO = buildUserDTOs().get(2);
+        userDTO.setId(2L);
+        userDTO.setPassword("12345");
+
+        when(repository.findDistinctById(2L)).thenReturn(of(buildUsers().get(0)));
+
+        try {
+            service.save(userDTO);
+        } catch (Exception ex) {
+            assertEquals(ValidationException.class, ex.getClass());
+            assertEquals(INVALID_FIELDS, ex.getMessage());
+        }
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("atualizando o contador total de utilizacao dos carros do usuario")
+    public void updateTotalUsageCounter() {
+        SecurityContext securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(new TestingAuthenticationToken(new UserDetail(buildUsers().get(0)),null));
+        setContext(securityContext);
+
+        doNothing().when(repository).updateTotalUsageCounter(buildUsers().get(0).getId());
+
+        service.updateTotalUsageCounter();
+
+        verify(repository, times(1)).updateTotalUsageCounter(1L);
+    }
+
 }

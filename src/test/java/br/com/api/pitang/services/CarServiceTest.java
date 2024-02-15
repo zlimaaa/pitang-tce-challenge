@@ -41,6 +41,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import static org.springframework.security.core.context.SecurityContextHolder.setContext;
@@ -84,7 +88,7 @@ public class CarServiceTest {
         assertEquals(2024, carDTO.getYear());
         assertEquals("Corolla XLS", carDTO.getModel());
         assertEquals("Preto", carDTO.getColor());
-        assertEquals("PLK6721", carDTO.getLicensePlate());
+        assertEquals("PLK-6721", carDTO.getLicensePlate());
 
     }
 
@@ -92,7 +96,7 @@ public class CarServiceTest {
     @Order(2)
     @DisplayName("Erro ao criar um carro com placa ja existente")
     public void errorCreatingCarT01() {
-        when(repository.countByLicensePlateAndIdNot("WXY0935", 0L)).thenReturn(1L);
+        when(repository.countByLicensePlateAndIdNot("WXY-0935", 0L)).thenReturn(1L);
 
         try {
             service.save(buildCarsDTOs().get(2));
@@ -122,7 +126,7 @@ public class CarServiceTest {
     @DisplayName("Erro ao criar um carro com placa invalida")
     public void errorCreatingCarT03() {
         CarDTO carDTO = buildCarsDTOs().get(2);
-        carDTO.setLicensePlate("PGK202");
+        carDTO.setLicensePlate("PGK-202");
 
         try {
             service.save(carDTO);
@@ -204,7 +208,7 @@ public class CarServiceTest {
         assertEquals(2024, carDTO.getYear());
         assertEquals("Corolla XLS", carDTO.getModel());
         assertEquals("Preto", carDTO.getColor());
-        assertEquals("PLK6721", carDTO.getLicensePlate());
+        assertEquals("PLK-6721", carDTO.getLicensePlate());
     }
 
     @Test
@@ -255,7 +259,8 @@ public class CarServiceTest {
         List<Car> cars = asList(buildCars().get(0), buildCars().get(1));
         Page<Car> page = new PageImpl<>(cars);
 
-        when(repository.findAllByUserId(1L, PageRequest.of(0, 10))).thenReturn(page);
+        Sort sort = by(desc("usageCounter"), asc("model"));
+        when(repository.findAllByUserId(1L, PageRequest.of(0, 10, sort))).thenReturn(page);
 
         Page<CarDTO> response = service.findAllByUser(0, 10);
 
@@ -263,12 +268,12 @@ public class CarServiceTest {
         assertEquals(2, response.getTotalElements());
         assertEquals(1L, response.getContent().get(0).getId());
         assertEquals(2024, response.getContent().get(0).getYear());
-        assertEquals("PLK6721", response.getContent().get(0).getLicensePlate());
+        assertEquals("PLK-6721", response.getContent().get(0).getLicensePlate());
         assertEquals("Preto", response.getContent().get(0).getColor());
         assertEquals("Corolla XLS", response.getContent().get(0).getModel());
         assertEquals(2L, response.getContent().get(1).getId());
         assertEquals(2022, response.getContent().get(1).getYear());
-        assertEquals("PTG7622", response.getContent().get(1).getLicensePlate());
+        assertEquals("PTG-7622", response.getContent().get(1).getLicensePlate());
         assertEquals("BRANCA", response.getContent().get(1).getColor());
         assertEquals("BMW GS 1200", response.getContent().get(1).getModel());
     }
@@ -278,15 +283,15 @@ public class CarServiceTest {
     @DisplayName("Atualizando carro com sucesso")
     public void updateCar() {
         Car carUpdated = buildCars().get(0);
-        carUpdated.setLicensePlate("PEL7452");
+        carUpdated.setLicensePlate("PEL-7452");
         carUpdated.setYear(2021);
 
-        when(repository.countByLicensePlateAndIdNot("PEL7452", 1L)).thenReturn(0L);
+        when(repository.countByLicensePlateAndIdNot("PEL-7452", 1L)).thenReturn(0L);
         when(repository.findById(1L)).thenReturn(of(buildCars().get(0)));
         when(repository.save(any(Car.class))).thenReturn(carUpdated);
 
         CarDTO carDTO = buildCarsDTOs().get(0);
-        carDTO.setLicensePlate("PEL7452");
+        carDTO.setLicensePlate("PEL-7452");
         carDTO.setYear(2021);
 
         carDTO = service.save(carDTO);
@@ -295,7 +300,7 @@ public class CarServiceTest {
         assertEquals(2021, carDTO.getYear());
         assertEquals("Corolla XLS", carDTO.getModel());
         assertEquals("Preto", carDTO.getColor());
-        assertEquals("PEL7452", carDTO.getLicensePlate());
+        assertEquals("PEL-7452", carDTO.getLicensePlate());
 
     }
 
@@ -326,6 +331,17 @@ public class CarServiceTest {
             assertEquals(ValidationException.class, ex.getClass());
             assertEquals(INVALID_FIELDS, ex.getMessage());
         }
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("atualizando o contador de utilizacao do carro")
+    public void updateUsageCounter() {
+        doNothing().when(repository).updateUsageCounter(1L, buildUsers().get(0).getId());
+
+        service.updateUsageCounter(1L);
+
+        verify(repository, times(1)).updateUsageCounter(1L, buildUsers().get(0).getId());
     }
 
 }

@@ -1,6 +1,7 @@
 package br.com.api.pitang.data.models;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import java.io.Serializable;
@@ -51,6 +52,7 @@ public class Car implements Serializable {
     @Column(name = "color", nullable = false)
     private String color;
 
+    @JsonBackReference
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -60,4 +62,11 @@ public class Car implements Serializable {
     @JsonFormat(shape = STRING, pattern = "dd/MM/yyyy HH:mm:ss.SSS")
     private LocalDateTime createdAt;
 
+    @Column(name = "usage_counter")
+    private Long usageCounter;
+
+    @Override
+    public String toString() {
+        return "";
+    }
 }

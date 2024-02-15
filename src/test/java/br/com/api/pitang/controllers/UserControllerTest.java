@@ -191,17 +191,32 @@ public class UserControllerTest {
     @Order(8)
     @DisplayName("Consultando todos os usuarios")
     public void findAllUsers() throws Exception {
+
+        User userTwo = buildUsers().get(3);
+        userTwo.setCreatedAt(LocalDateTime.now());
+        userTwo.setTotalUsageCounter(12L);
+        userTwo = repository.save(userTwo);
+
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content.[0].id").value(userId))
-                .andExpect(jsonPath("$.content.[0].firstName").value("Lucas"))
-                .andExpect(jsonPath("$.content.[0].lastName").value("Filho"))
-                .andExpect(jsonPath("$.content.[0].birthDate").value("11/11/2000"))
-                .andExpect(jsonPath("$.content.[0].email").value("luquinhas@gmail.com"))
-                .andExpect(jsonPath("$.content.[0].login").value("luquinhas"))
-                .andExpect(jsonPath("$.content.[0].phone").value("21988826756"))
-                .andExpect(jsonPath("$.content.[0].createdAt").isNotEmpty());
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content.[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].firstName").value("Marcos"))
+                .andExpect(jsonPath("$.content.[0].lastName").value("Pontes"))
+                .andExpect(jsonPath("$.content.[0].birthDate").value("30/10/1980"))
+                .andExpect(jsonPath("$.content.[0].email").value("marcos@gmail.com"))
+                .andExpect(jsonPath("$.content.[0].login").value("marcos"))
+                .andExpect(jsonPath("$.content.[0].phone").value("87987695672"))
+                .andExpect(jsonPath("$.content.[1].id").value(userId))
+                .andExpect(jsonPath("$.content.[1].firstName").value("Lucas"))
+                .andExpect(jsonPath("$.content.[1].lastName").value("Filho"))
+                .andExpect(jsonPath("$.content.[1].birthDate").value("11/11/2000"))
+                .andExpect(jsonPath("$.content.[1].email").value("luquinhas@gmail.com"))
+                .andExpect(jsonPath("$.content.[1].login").value("luquinhas"))
+                .andExpect(jsonPath("$.content.[1].phone").value("21988826756"))
+                .andExpect(jsonPath("$.content.[1].createdAt").isNotEmpty());
+
+        repository.deleteById(userTwo.getId());
     }
 
     @Test
@@ -226,6 +241,20 @@ public class UserControllerTest {
 
     @Test
     @Order(10)
+    @DisplayName("Erro ao atualizar usuario com senha invalida")
+    public void errorUpdateUser() throws Exception {
+        UserDTO userDTO = buildUserDTOs().get(0);
+        userDTO.setId(userId);
+        userDTO.setPassword("12345");
+
+        String errorMessage = requireNonNull(mockMvc.perform(post("/api/users").contentType(APPLICATION_JSON).content(gson.toJson(userDTO)))
+                .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
+
+        assertTrue(errorMessage.contains(INVALID_FIELDS));
+    }
+
+    @Test
+    @Order(11)
     @DisplayName("Exluindo usuario com sucesso")
     public void deleteUser() throws Exception {
         mockMvc.perform(delete("/api/users/" + userId)).andExpect(status().isNoContent());
@@ -233,7 +262,7 @@ public class UserControllerTest {
         assertTrue(repository.findById(userId).isEmpty());
     }
     @Test
-    @Order(11)
+    @Order(12)
     @DisplayName("Erro ao excluir usuario inexistente")
     public void deleteUserError() throws Exception {
         try {
@@ -245,7 +274,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     @DisplayName("Consultando usuario com carros por id ")
     public void findUserWithCarsById() throws Exception {
         User user = buildUsers().get(4);
@@ -274,17 +303,16 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.cars[0].year").value(1986))
                 .andExpect(jsonPath("$.cars[0].model").value("Fusca 1300cc"))
                 .andExpect(jsonPath("$.cars[0].color").value("Azul"))
-                .andExpect(jsonPath("$.cars[0].licensePlate").value("KJP8872"))
+                .andExpect(jsonPath("$.cars[0].licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.cars[1].id").isNotEmpty())
                 .andExpect(jsonPath("$.cars[1].year").value(2015))
                 .andExpect(jsonPath("$.cars[1].model").value("Toyota Etios Sedan"))
                 .andExpect(jsonPath("$.cars[1].color").value("Prata"))
-                .andExpect(jsonPath("$.cars[1].licensePlate").value("OQA6400"))
+                .andExpect(jsonPath("$.cars[1].licensePlate").value("OQA-6400"))
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.lastLogin").isNotEmpty());
 
         repository.deleteById(user.getId());
     }
-
 
 }

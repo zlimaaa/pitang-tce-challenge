@@ -11,15 +11,23 @@ import br.com.api.pitang.exceptions.ValidationException;
 import br.com.api.pitang.repositories.UserRepository;
 import static br.com.api.pitang.utils.DozerConverter.convertObject;
 import static br.com.api.pitang.utils.GenericUtils.generatePasswordHash;
+import static br.com.api.pitang.utils.GenericUtils.getUserLogged;
 import static br.com.api.pitang.utils.GenericUtils.isValidEmail;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import static java.time.LocalDateTime.now;
+import static java.util.Objects.requireNonNull;
 import javax.persistence.EntityNotFoundException;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +37,6 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
-
 
     @Transactional(rollbackFor = Exception.class)
     public UserDTO save(UserDTO userDTO) {
@@ -43,8 +50,9 @@ public class UserService {
     }
 
     public Page<UserDTO> findAll(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<User> users =  repository.findAll(pageable);
+        Sort sort = by(desc("totalUsageCounter"), asc("login"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<User> users = repository.findAll(pageable);
         return users.map(this::convertEntityToDTO);
     }
 
@@ -69,7 +77,14 @@ public class UserService {
         repository.deleteById(id);
     }
 
-
+    /**
+     * validacao de campos vazio: firstName, lastName, birthDate, email, login, phone
+     * validacao de campos invalidos: birthDate (data futura), email (xxx@xx),
+     * phone (ddd + digito 9 + numero) , senha (menor que 6 caracteres)
+     *
+     * @param user
+     * @throws ValidationException caso falhe em alguma das verificacoes acima
+     */
     private void validateFields(User user) throws ValidationException {
 
         if (isBlank(user.getFirstName()) ||
@@ -86,7 +101,7 @@ public class UserService {
             throw new ValidationException(INVALID_FIELDS);
 
         if (user.getId() == null)
-           validateInsert(user);
+            validateInsert(user);
         else
             validateUpdate(user);
 
@@ -95,26 +110,52 @@ public class UserService {
 
     }
 
+    /**
+     * valida se a senha e vazia ou se e menor que 6 caracteres
+     * seta a data de criacao e criptografa a senha do usuario
+     * @param user
+     * @throws ValidationException caso falhe em alguma das verificacoes acima
+     */
     private void validateInsert(User user) {
         if (isBlank(user.getPassword()))
             throw new ValidationException(MISSING_FIELDS);
 
+        if (user.getPassword().length() < 6)
+            throw new ValidationException(INVALID_FIELDS);
+
         user.setCreatedAt(now());
         user.setPassword(generatePasswordHash(user.getPassword()));
+        user.setTotalUsageCounter(0L);
     }
 
+    /**
+     * nao e obrigatorio a atualizacao da senha, porem caso haja tal
+     * atualizacao, a senha devera ser maior ou igual a 6 caracteres
+     * @param user
+     * @throws ValidationException caso falhe na validacao acima
+     */
     private void validateUpdate(User user) {
         User userSaved = convertDTOtoEntity(findById(user.getId()));
 
-        if (!isBlank(user.getPassword()))
-            user.setPassword(generatePasswordHash(user.getPassword()));
-        else
+        if (!isBlank(user.getPassword())) {
+            if (user.getPassword().length() < 6)
+                throw new ValidationException(INVALID_FIELDS);
+            else
+                user.setPassword(generatePasswordHash(user.getPassword()));
+        } else
             user.setPassword(userSaved.getPassword());
 
         user.setCreatedAt(userSaved.getCreatedAt());
         user.setLastLogin(userSaved.getLastLogin());
+        user.setTotalUsageCounter(userSaved.getTotalUsageCounter());
     }
 
+    /**
+     * validacao de unicidade para os campos login e email
+     *
+     * @param user
+     * @throws ValidationException caso haja outro usuario com o mesmo login ou mesmo email
+     */
     private void unique(User user) throws ValidationException {
         Long userId = user.getId() == null ? 0L : user.getId();
         Long countLogin = repository.countByLoginAndIdNot(user.getLogin(), userId);
@@ -132,6 +173,21 @@ public class UserService {
 
     private UserDTO convertEntityToDTO(User user) {
         return convertObject(user, UserDTO.class);
+    }
+
+    /**
+     * Job para deletar usuarios no banco cuja data do ultimo login tenha
+     * ultrapassado os 30 dias, esse job roda diariamente as 23:30 da noite
+     */
+    @Scheduled(cron = "${spring.task.scheduling.cron}")
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteInactiveUsers() {
+        repository.deleteInactiveUsers(LocalDateTime.now().minusDays(30));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateTotalUsageCounter() {
+       repository.updateTotalUsageCounter(requireNonNull(getUserLogged()).getId());
     }
 
 }

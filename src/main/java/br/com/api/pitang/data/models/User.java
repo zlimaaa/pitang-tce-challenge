@@ -2,13 +2,14 @@ package br.com.api.pitang.data.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.CascadeType;
+import static javax.persistence.CascadeType.REMOVE;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import static javax.persistence.FetchType.LAZY;
 import javax.persistence.GeneratedValue;
 import static javax.persistence.GenerationType.SEQUENCE;
 import javax.persistence.Id;
@@ -73,11 +74,20 @@ public class User implements GrantedAuthority {
     @JsonFormat(shape = STRING, pattern = "dd/MM/yyyy HH:mm:ss.SSS")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = REMOVE, fetch = LAZY)
     private List<Car> cars;
+
+    @Column(name = "total_usage_counter")
+    private Long totalUsageCounter;
 
     @Override
     public String getAuthority() {
         return "USER";
+    }
+
+    @Override
+    public String toString() {
+        return "";
     }
 }

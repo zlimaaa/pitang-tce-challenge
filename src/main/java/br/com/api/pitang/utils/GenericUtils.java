@@ -18,11 +18,6 @@ public class GenericUtils {
         return bCrypt.encode(password);
     }
 
-    public static boolean isPasswordsMatches(String password, String hashPassword) {
-        BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder();
-        return bCrypt.matches(password, hashPassword);
-    }
-
     public static User getUserLogged() {
         Authentication authentication = getContext().getAuthentication();
         if (authentication == null) return null;

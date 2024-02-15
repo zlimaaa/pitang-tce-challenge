@@ -20,6 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +32,6 @@ public class CarService {
 
     @Autowired
     private CarRepository repository;
-
 
     @Transactional(rollbackFor = Exception.class)
     public CarDTO save(CarDTO carDTO) {
@@ -42,7 +45,8 @@ public class CarService {
     }
 
     public Page<CarDTO> findAllByUser(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Sort sort = by(desc("usageCounter"), asc("model"));
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<Car> cars = repository.findAllByUserId(requireNonNull(getUserLogged()).getId(), pageable);
         return cars.map(this::convertEntityToDTO);
     }
@@ -57,6 +61,12 @@ public class CarService {
         repository.deleteById(id);
     }
 
+    /**
+     * validacao de campos vazio: licensePlate, model, color, year
+     * validacao de campos invalidos: year (menor que 1885 ou ano futuro), licensePlate (TCE-2024)
+     * @param car
+     * @throws ValidationException caso falhe em alguma das verificacoes acima
+     */
     private void validateFields(Car car) {
 
         if (isBlank(car.getLicensePlate()) ||
@@ -66,7 +76,7 @@ public class CarService {
             throw new ValidationException(MISSING_FIELDS);
 
         if (!isValidCarYear(car.getYear()) ||
-                car.getLicensePlate().length() != 7)
+                car.getLicensePlate().length() != 8)
             throw new ValidationException(INVALID_FIELDS);
 
         if (car.getId() == null)
@@ -80,15 +90,22 @@ public class CarService {
     private void validateInsert(Car car) {
         car.setCreatedAt(LocalDateTime.now());
         car.setUser(getUserLogged());
+        car.setUsageCounter(0L);
     }
 
     private void validateUpdated(Car car) {
         Car carSaved = getCarIfUserHasPermission(car.getId());
         car.setCreatedAt(carSaved.getCreatedAt());
         car.setUser(carSaved.getUser());
+        car.setUsageCounter(carSaved.getUsageCounter());
     }
 
-
+    /**
+     * procura um carro pelo id e caso o encontre, valida se o carro encontradado
+     * pertence ao usuario logado
+     * @param id
+     * @return Car  caso o carro encontrado pertenca ao usuario logado
+     */
     private Car getCarIfUserHasPermission(Long id) {
         Car carSaved = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(CAR_NOT_FOUND));
@@ -99,6 +116,12 @@ public class CarService {
         return carSaved;
     }
 
+    /**
+     * validacao de unicidade da placa do carro, verificando se a placa
+     * ja existe no banco, mesmo que pertencendo a outro usuario
+     * @param car
+     * @throws ValidationException caso haja outro carro com a mesma placa
+     */
     private void unique(Car car) {
         Long carId = car.getId() == null ? 0L : car.getId();
         Long count = repository.countByLicensePlateAndIdNot(car.getLicensePlate(), carId);
@@ -110,6 +133,11 @@ public class CarService {
     private boolean isValidCarYear(Integer year) {
         int currentYear = Year.now().getValue();
         return year >= 1885 && year <= currentYear;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUsageCounter(Long carId) {
+        repository.updateUsageCounter(carId, requireNonNull(getUserLogged()).getId());
     }
 
     private Car convertDTOtoEntity(CarDTO carDTO) {

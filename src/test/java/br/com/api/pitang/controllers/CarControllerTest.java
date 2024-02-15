@@ -71,7 +71,7 @@ public class CarControllerTest {
     @Autowired
     private CarController controller;
 
-    private Long carId;
+    private Car car;
 
     @BeforeAll
     @DisplayName("Preparando para iniciar os testes com um usuario salvo no banco e na sessao")
@@ -87,8 +87,7 @@ public class CarControllerTest {
         Car car = buildCars().get(3);
         car.setCreatedAt(LocalDateTime.now());
         car.setUser(user);
-        car = repository.save(car);
-        carId = car.getId();
+        this.car = repository.save(car);
 
         SecurityContext securityContext = new SecurityContextImpl();
         securityContext.setAuthentication(new TestingAuthenticationToken(new UserDetail(user), null));
@@ -106,7 +105,7 @@ public class CarControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.year").value(1998))
-                .andExpect(jsonPath("$.licensePlate").value("WXY0935"))
+                .andExpect(jsonPath("$.licensePlate").value("WXY-0935"))
                 .andExpect(jsonPath("$.color").value("Preto"))
                 .andExpect(jsonPath("$.model").value("Celta"));
     }
@@ -116,7 +115,7 @@ public class CarControllerTest {
     @DisplayName("Erro ao criar carro com placa existente")
     public void errorCreatingCarT01() throws Exception {
         CarDTO carDTO = buildCarsDTOs().get(3);
-        carDTO.setLicensePlate("KJP8872");
+        carDTO.setLicensePlate("KJP-8872");
 
         String errorMessage = requireNonNull(mockMvc.perform(post("/api/cars").contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
@@ -129,7 +128,7 @@ public class CarControllerTest {
     @DisplayName("Erro ao criar carro com placa invalida")
     public void errorCreatingCarT02() throws Exception {
         CarDTO carDTO = buildCarsDTOs().get(3);
-        carDTO.setLicensePlate("KJP882");
+        carDTO.setLicensePlate("KJP-882");
 
         String errorMessage = requireNonNull(mockMvc.perform(post("/api/cars").contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
                 .andExpect(status().isBadRequest()).andReturn().getResolvedException()).getMessage();
@@ -193,25 +192,39 @@ public class CarControllerTest {
     @Order(8)
     @DisplayName("Consultando todos os carros do usuario logado")
     public void findAllCars() throws Exception {
+
+        Car car =  buildCars().get(2);
+        car.setUsageCounter(2L);
+        car.setCreatedAt(LocalDateTime.now());
+        car.setUser(User.builder().id(this.car.getUser().getId()).build());
+        repository.save(car);
+
         mockMvc.perform(get("/api/cars"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content.[0].id").value(carId))
-                .andExpect(jsonPath("$.content.[0].year").value(1986))
-                .andExpect(jsonPath("$.content.[0].licensePlate").value("KJP8872"))
-                .andExpect(jsonPath("$.content.[0].color").value("Azul"))
-                .andExpect(jsonPath("$.content.[0].model").value("Fusca 1300cc"));
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.content.[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].year").value(2008))
+                .andExpect(jsonPath("$.content.[0].licensePlate").value("GHF-6292"))
+                .andExpect(jsonPath("$.content.[0].color").value("Vermelho"))
+                .andExpect(jsonPath("$.content.[0].model").value("Uno Miller"))
+                .andExpect(jsonPath("$.content.[1].id").value(this.car.getId()))
+                .andExpect(jsonPath("$.content.[1].year").value(1986))
+                .andExpect(jsonPath("$.content.[1].licensePlate").value("KJP-8872"))
+                .andExpect(jsonPath("$.content.[1].color").value("Azul"))
+                .andExpect(jsonPath("$.content.[1].model").value("Fusca 1300cc"));
+
+        repository.deleteById(car.getId());
     }
 
     @Test
     @Order(9)
     @DisplayName("Consultando carro do usario logado pelo id")
     public void findCar() throws Exception {
-        mockMvc.perform(get("/api/cars/" + carId))
+        mockMvc.perform(get("/api/cars/" + car.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(carId))
+                .andExpect(jsonPath("$.id").value(car.getId()))
                 .andExpect(jsonPath("$.year").value(1986))
-                .andExpect(jsonPath("$.licensePlate").value("KJP8872"))
+                .andExpect(jsonPath("$.licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.color").value("Azul"))
                 .andExpect(jsonPath("$.model").value("Fusca 1300cc"));
     }
@@ -221,16 +234,16 @@ public class CarControllerTest {
     @DisplayName("Atualizando carro do usario logado com sucesso")
     public void updateCar() throws Exception {
         Car car = buildCars().get(3);
-        car.setLicensePlate("KKK0287");
+        car.setLicensePlate("KKK-0287");
         car.setColor("Roxo");
 
         CarDTO carDTO = convertObject(car, CarDTO.class);
 
-        mockMvc.perform(put("/api/cars/" + carId).contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
+        mockMvc.perform(put("/api/cars/" + this.car.getId()).contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(carId))
+                .andExpect(jsonPath("$.id").value(this.car.getId()))
                 .andExpect(jsonPath("$.year").value(1986))
-                .andExpect(jsonPath("$.licensePlate").value("KKK0287"))
+                .andExpect(jsonPath("$.licensePlate").value("KKK-0287"))
                 .andExpect(jsonPath("$.color").value("Roxo"))
                 .andExpect(jsonPath("$.model").value("Fusca 1300cc"));
     }
@@ -240,7 +253,7 @@ public class CarControllerTest {
     @DisplayName("Erro ao atualizar carro com id inexistente")
     public void errorUpdateCar() throws Exception {
         Car car = buildCars().get(3);
-        car.setLicensePlate("KKK0287");
+        car.setLicensePlate("KKK-0287");
         car.setColor("Roxo");
 
         CarDTO carDTO = convertObject(car, CarDTO.class);
@@ -259,10 +272,10 @@ public class CarControllerTest {
     @Order(12)
     @DisplayName("Deletando carro do usuario logado")
     public void deleteCar() throws Exception {
-        mockMvc.perform(delete("/api/cars/" + carId))
+        mockMvc.perform(delete("/api/cars/" + car.getId()))
                 .andExpect(status().isNoContent());
 
-        assertTrue(repository.findById(carId).isEmpty());
+        assertTrue(repository.findById(car.getId()).isEmpty());
     }
 
     @Test
@@ -277,6 +290,7 @@ public class CarControllerTest {
 
         Car car = buildCars().get(2);
         car.setUser(user);
+        car.setLicensePlate("YXZ-4343");
         car.setCreatedAt(LocalDateTime.now());
         car = repository.save(car);
 
