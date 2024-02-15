@@ -467,7 +467,7 @@ public class UserServiceTest {
     }
 
     @Test
-    @Order(22)
+    @Order(23)
     @DisplayName("atualizando o contador total de utilizacao dos carros do usuario")
     public void updateTotalUsageCounter() {
         SecurityContext securityContext = new SecurityContextImpl();
