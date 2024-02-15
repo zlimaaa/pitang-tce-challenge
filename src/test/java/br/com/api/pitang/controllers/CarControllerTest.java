@@ -71,8 +71,7 @@ public class CarControllerTest {
     @Autowired
     private CarController controller;
 
-    private Long carId;
-    private Long userId;
+    private Car car;
 
     @BeforeAll
     @DisplayName("Preparando para iniciar os testes com um usuario salvo no banco e na sessao")
@@ -84,13 +83,11 @@ public class CarControllerTest {
         user.setLogin("testeCar");
         user.setCreatedAt(LocalDateTime.now());
         user = userRepository.save(user);
-        userId = user.getId();
 
         Car car = buildCars().get(3);
         car.setCreatedAt(LocalDateTime.now());
         car.setUser(user);
-        car = repository.save(car);
-        carId = car.getId();
+        this.car = repository.save(car);
 
         SecurityContext securityContext = new SecurityContextImpl();
         securityContext.setAuthentication(new TestingAuthenticationToken(new UserDetail(user), null));
@@ -199,7 +196,7 @@ public class CarControllerTest {
         Car car =  buildCars().get(2);
         car.setUsageCounter(2L);
         car.setCreatedAt(LocalDateTime.now());
-        car.setUser(User.builder().id(userId).build());
+        car.setUser(User.builder().id(this.car.getUser().getId()).build());
         repository.save(car);
 
         mockMvc.perform(get("/api/cars"))
@@ -210,22 +207,22 @@ public class CarControllerTest {
                 .andExpect(jsonPath("$.content.[0].licensePlate").value("GHF-6292"))
                 .andExpect(jsonPath("$.content.[0].color").value("Vermelho"))
                 .andExpect(jsonPath("$.content.[0].model").value("Uno Miller"))
-                .andExpect(jsonPath("$.content.[1].id").value(carId))
+                .andExpect(jsonPath("$.content.[1].id").value(this.car.getId()))
                 .andExpect(jsonPath("$.content.[1].year").value(1986))
                 .andExpect(jsonPath("$.content.[1].licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.content.[1].color").value("Azul"))
                 .andExpect(jsonPath("$.content.[1].model").value("Fusca 1300cc"));
 
-        repository.deleteById(car.getId());todo
+        repository.deleteById(car.getId());
     }
 
     @Test
     @Order(9)
     @DisplayName("Consultando carro do usario logado pelo id")
     public void findCar() throws Exception {
-        mockMvc.perform(get("/api/cars/" + carId))
+        mockMvc.perform(get("/api/cars/" + car.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(carId))
+                .andExpect(jsonPath("$.id").value(car.getId()))
                 .andExpect(jsonPath("$.year").value(1986))
                 .andExpect(jsonPath("$.licensePlate").value("KJP-8872"))
                 .andExpect(jsonPath("$.color").value("Azul"))
@@ -242,9 +239,9 @@ public class CarControllerTest {
 
         CarDTO carDTO = convertObject(car, CarDTO.class);
 
-        mockMvc.perform(put("/api/cars/" + carId).contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
+        mockMvc.perform(put("/api/cars/" + this.car.getId()).contentType(APPLICATION_JSON).content(gson.toJson(carDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(carId))
+                .andExpect(jsonPath("$.id").value(this.car.getId()))
                 .andExpect(jsonPath("$.year").value(1986))
                 .andExpect(jsonPath("$.licensePlate").value("KKK-0287"))
                 .andExpect(jsonPath("$.color").value("Roxo"))
@@ -275,10 +272,10 @@ public class CarControllerTest {
     @Order(12)
     @DisplayName("Deletando carro do usuario logado")
     public void deleteCar() throws Exception {
-        mockMvc.perform(delete("/api/cars/" + carId))
+        mockMvc.perform(delete("/api/cars/" + car.getId()))
                 .andExpect(status().isNoContent());
 
-        assertTrue(repository.findById(carId).isEmpty());
+        assertTrue(repository.findById(car.getId()).isEmpty());
     }
 
     @Test

@@ -187,7 +187,7 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public void updateTotalUsageCounter() {
-       repository.updateTotalUsageCounter(requireNonNull(getUserLogged()).getId()); //nao tem usuario logado nesse momento, usario validar se é isso mesmo
+       repository.updateTotalUsageCounter(requireNonNull(getUserLogged()).getId());
     }
 
 }

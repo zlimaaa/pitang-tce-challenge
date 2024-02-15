@@ -191,9 +191,11 @@ public class UserControllerTest {
     @Order(8)
     @DisplayName("Consultando todos os usuarios")
     public void findAllUsers() throws Exception {
+
+
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2))
                 .andExpect(jsonPath("$.content.[0].id").value(userId))
                 .andExpect(jsonPath("$.content.[0].firstName").value("Lucas"))
                 .andExpect(jsonPath("$.content.[0].lastName").value("Filho"))

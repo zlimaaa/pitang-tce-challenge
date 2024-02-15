@@ -19,6 +19,13 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -36,6 +43,7 @@ public class UserRepositoryTest {
     @DisplayName("Preparando para iniciar os testes com usuarios salvos no banco")
     public void setUp() {
         User userAux = buildUsers().get(0);
+        userAux.setTotalUsageCounter(22L);
         userAux.setCreatedAt(LocalDateTime.now().minusWeeks(5));
         user = repository.save(userAux);
         repository.save(buildUsers().get(1));
@@ -129,7 +137,49 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
+    @DisplayName("Listando todos os usuarios com a regra do bonus stage")
+    public void findAllWithOrderBy() {
+
+        User userTwo = buildUsers().get(4);
+        userTwo.setId(null);
+        userTwo.setCars(null);
+        userTwo.setTotalUsageCounter(15L);
+        repository.save(userTwo);
+
+        Sort sort = by(desc("totalUsageCounter"), asc("login"));
+        Pageable pageable = PageRequest.of(0, 5, sort);
+        Page<User> users = repository.findAll(pageable);
+
+        assertEquals(3, users.getTotalElements());
+        assertEquals("Ricardo", users.getContent().get(0).getFirstName());
+        assertEquals("Lima", users.getContent().get(0).getLastName());
+        assertEquals(LocalDate.of(1997,12,14), users.getContent().get(0).getBirthDate());
+        assertEquals("ricardo@gmail.com", users.getContent().get(0).getEmail());
+        assertEquals("ricardo", users.getContent().get(0).getLogin());
+        assertEquals("$2a$10$AQe5K87Y5CysW4un0eDi5OAncw.zUYqlfsQw7aSEMvtRMxYKM0EwO", users.getContent().get(0).getPassword());
+        assertEquals("81988775423", users.getContent().get(0).getPhone());
+
+        assertEquals("Otavio", users.getContent().get(1).getFirstName());
+        assertEquals("Mendes", users.getContent().get(1).getLastName());
+        assertEquals(LocalDate.of(1979,2,1), users.getContent().get(1).getBirthDate());
+        assertEquals("otavio-m@gmail.com", users.getContent().get(1).getEmail());
+        assertEquals("mendes", users.getContent().get(1).getLogin());
+        assertEquals("$2a$10$A3BtshmFkCkcmWkDLfzA6OoS0xIEVPvc/rh2lbITuzoNqSFHjuizC", users.getContent().get(1).getPassword());
+        assertEquals("87983772270", users.getContent().get(1).getPhone());
+
+        assertEquals("Fernando", users.getContent().get(2).getFirstName());
+        assertEquals("Costa", users.getContent().get(2).getLastName());
+        assertEquals(LocalDate.of(1999,2,1), users.getContent().get(2).getBirthDate());
+        assertEquals("nando@gmail.com", users.getContent().get(2).getEmail());
+        assertEquals("nando01", users.getContent().get(2).getLogin());
+        assertEquals("$2a$10$A3BtshmFkCkcmWkDLfzA6OoS0xIEVPvc/rh2lbITuzoNqSFHjuizC", users.getContent().get(2).getPassword());
+        assertEquals("11989774271", users.getContent().get(2).getPhone());
+    }
+
+
+    @Test
+    @Order(9)
     @DisplayName("Deletando usuario")
     public void deleteUserById() {
         repository.deleteById(user.getId());
@@ -144,7 +194,7 @@ public class UserRepositoryTest {
 
 
     @Test
-    @Order(8)
+    @Order(10)
     @DisplayName("Deletando usuarios inativos")
     public void deleteInactiveUsers() {
 
