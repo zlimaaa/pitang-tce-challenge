@@ -185,10 +185,9 @@ public class UserService {
         repository.deleteInactiveUsers(LocalDateTime.now().minusDays(30));
     }
 
-
     @Transactional(rollbackFor = Exception.class)
     public void updateTotalUsageCounter() {
-       repository.updateTotalUsageCounter(requireNonNull(getUserLogged()).getId());
+       repository.updateTotalUsageCounter(requireNonNull(getUserLogged()).getId()); //nao tem usuario logado nesse momento, usario validar se é isso mesmo
     }
 
 }

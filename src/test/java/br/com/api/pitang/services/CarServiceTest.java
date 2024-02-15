@@ -41,6 +41,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import static org.springframework.security.core.context.SecurityContextHolder.setContext;
@@ -255,7 +259,8 @@ public class CarServiceTest {
         List<Car> cars = asList(buildCars().get(0), buildCars().get(1));
         Page<Car> page = new PageImpl<>(cars);
 
-        when(repository.findAllByUserId(1L, PageRequest.of(0, 10))).thenReturn(page);
+        Sort sort = by(desc("usageCounter"), asc("model"));
+        when(repository.findAllByUserId(1L, PageRequest.of(0, 10, sort))).thenReturn(page);
 
         Page<CarDTO> response = service.findAllByUser(0, 10);
 
@@ -326,6 +331,17 @@ public class CarServiceTest {
             assertEquals(ValidationException.class, ex.getClass());
             assertEquals(INVALID_FIELDS, ex.getMessage());
         }
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("atualizando o contador de utilizacao do carro")
+    public void updateUsageCounter() {
+        doNothing().when(repository).updateUsageCounter(1L, buildUsers().get(0).getId());
+
+        service.updateUsageCounter(1L);
+
+        verify(repository, times(1)).updateUsageCounter(1L, buildUsers().get(0).getId());
     }
 
 }

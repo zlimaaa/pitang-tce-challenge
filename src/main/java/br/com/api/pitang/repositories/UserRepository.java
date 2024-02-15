@@ -24,7 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param id id do usuario
      */
     @Modifying
-    @Query("UPDATE User u SET u.totalUsageCounter = (SELECT SUM(c.usageCounter) FROM u.cars c) where u.id = :id")
+    @Query("UPDATE User u SET u.totalUsageCounter = (SELECT coalesce(SUM(c.usageCounter), 0) FROM u.cars c) where u.id = :id")
     void updateTotalUsageCounter(@Param(value = "id") Long id);
 
     @Modifying

@@ -1,5 +1,6 @@
 package br.com.api.pitang.services;
 
+import br.com.api.pitang.configs.security.UserDetail;
 import static br.com.api.pitang.constants.MessagesConstants.EMAIL_ALREADY_EXISTS;
 import static br.com.api.pitang.constants.MessagesConstants.INVALID_FIELDS;
 import static br.com.api.pitang.constants.MessagesConstants.LOGIN_ALREADY_EXISTS;
@@ -38,7 +39,15 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
+import static org.springframework.data.domain.Sort.by;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import static org.springframework.security.core.context.SecurityContextHolder.setContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -335,7 +344,8 @@ public class UserServiceTest {
         List<User> users = asList(buildUsers().get(0), buildUsers().get(1));
         Page<User> page = new PageImpl<>(users);
 
-        when(repository.findAll(any(Pageable.class))).thenReturn(page);
+        Sort sort =  by(desc("totalUsageCounter"), asc("login"));
+        when(repository.findAll(PageRequest.of(0, 10, sort))).thenReturn(page);
 
         Page<UserDTO> response = service.findAll(0, 10);
 
@@ -454,6 +464,21 @@ public class UserServiceTest {
             assertEquals(ValidationException.class, ex.getClass());
             assertEquals(INVALID_FIELDS, ex.getMessage());
         }
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("atualizando o contador total de utilizacao dos carros do usuario")
+    public void updateTotalUsageCounter() {
+        SecurityContext securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(new TestingAuthenticationToken(new UserDetail(buildUsers().get(0)),null));
+        setContext(securityContext);
+
+        doNothing().when(repository).updateTotalUsageCounter(buildUsers().get(0).getId());
+
+        service.updateTotalUsageCounter();
+
+        verify(repository, times(1)).updateTotalUsageCounter(1L);
     }
 
 }

@@ -19,6 +19,7 @@ public class CarFactory {
                         .licensePlate("PLK-6721")
                         .createdAt(LocalDateTime.now())
                         .user(User.builder().id(1L).build())
+                        .usageCounter(15L)
                         .build(),
                 Car.builder()
                         .id(2L)
@@ -28,6 +29,7 @@ public class CarFactory {
                         .licensePlate("PTG-7622")
                         .createdAt(LocalDateTime.now())
                         .user(User.builder().id(1L).build())
+                        .usageCounter(20L)
                         .build(),
                 Car.builder()
                         .year(2008)
@@ -49,6 +51,7 @@ public class CarFactory {
                         .licensePlate("OQA-6400")
                         .createdAt(LocalDateTime.now())
                         .user(User.builder().id(5L).build())
+                        .usageCounter(15L)
                         .build()
         );
     }
