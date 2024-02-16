@@ -101,234 +101,213 @@ do Scrum onde o foco é realizar pequenas entregas, porém funcionais...
 6. Desenvolvimento do frontend em um repositório a parte;
                                                              
 ### CRUD - Usuários
-       
+ ```      
 1. Cadastrar um Novo Usuário (/api/users):
     - Como usuário do sistema, desejo poder cadastrar um novo usuário fornecendo informações como nome, sobrenome, 
    e-mail, data de nascimento, login, senha e telefone, para permitir o acesso total ao sistema.
      
-    <br>                            
                                      
-     - -[x]  Critérios de Aceitação: 
-           - A API deve aceitar uma solicitação POST com os dados do novo usuário.
-           - Se o cadastro for bem-sucedido, a API deve retornar o usuário recém-criado com o status 201 Created.
-           - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
+     - Critérios de Aceitação: 
+       - A API deve aceitar uma solicitação POST com os dados do novo usuário.
+       - Se o cadastro for bem-sucedido, a API deve retornar o usuário recém-criado com o status 201 Created.
+       - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
              
-             - Cenários de erros:
-                1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
-                2. Login já existente: retornar um erro com a mensagem “Login already exists”;
-                3. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;  
-                4. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
+     - Cenários de erros:
+        1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
+        2. Login já existente: retornar um erro com a mensagem “Login already exists”;
+        3. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;  
+        4. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
 
-<br>
 
 2. Listar Todos os Usuários (/api/users):
 
-    - Como usuário do sistema, desejo poder visualizar todos os usuários cadastrados, para ter uma visão geral dos usuários registrados.
+    - Como usuário do sistema, desejo poder visualizar todos os usuários cadastrados, 
+    para ter uma visão geral dos usuários registrados.
    
-    <br>
    
-    - -[x]  Critérios de Aceitação:
+    - Critérios de Aceitação:
          - A API deve retornar uma lista de todos os usuários cadastrados no sistema.
 
-  <br> 
 
 3. Buscar um Usuário pelo ID (/api/users/{id}):
     
-   - Como usuário do sistema, desejo poder buscar um usuário específico pelo seu ID, para visualizar os detalhes desse usuário.
+   - Como usuário do sistema, desejo poder buscar um usuário específico 
+   pelo seu ID, para visualizar os detalhes desse usuário.
    
-    <br>
 
-      - -[x]  Critérios de Aceitação:                                                   
-           - A API deve aceitar uma solicitação GET com o ID do usuário desejado.
-           - Se o usuário for encontrado, a API deve retornar os detalhes desse usuário com o status 200 OK.
-           - Se o usuário não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
+     - Critérios de Aceitação:                                                   
+       - A API deve aceitar uma solicitação GET com o ID do usuário desejado.
+       - Se o usuário for encontrado, a API deve retornar os detalhes desse usuário com o status 200 OK.
+       - Se o usuário não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
 
          
-<br>
-
  4. Remover um Usuário pelo ID (/api/users/{id}):
 
     - Como usuário do sistema, desejo poder remover um usuário específico pelo seu ID, caso necessário.
                 
-    <br>
     
-    - -[x] Critérios de Aceitação: 
+    - Critérios de Aceitação: 
         - A API deve aceitar uma solicitação DELETE com o ID do usuário a ser removido.
         - Se o usuário for removido com sucesso, a API não precisará retornar um body e o status deverá ser 204 No Content.
         - Se o usuário não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
         
 
-<br>
-
 
  5. Atualizar um Usuário pelo ID (/api/users/{id}):
     
-    - Como usuário do sistema, desejo poder atualizar as informações de um usuário específico pelo seu ID, caso necessário.
+    - Como usuário do sistema, desejo poder atualizar as informações de um usuário específico 
+      pelo seu ID, caso necessário.
          
-      <br>
-    
-    -
-        -[x] Critérios de Aceitação:
+         
+         - Critérios de Aceitação:
              - A API deve aceitar uma solicitação PUT com o ID do usuário a ser atualizado juntamente com as informaçõs do 
-          usuário como nome, sobrenome, e-mail, data de nascimento, login e telefone todos esses campos deverão ser informados, 
-          mesmo que não forem alterados, no caso do campo senha, o mesmo só deverá ser informado caso haja a intenção de atualizar a senha.
+                usuário como nome, sobrenome, e-mail, data de nascimento, login e telefone todos esses campos deverão ser informados, 
+                mesmo que não forem alterados, no caso do campo senha, o mesmo só deverá ser informado caso haja a intenção de atualizar a senha.
              - Se a atualização for bem-sucedida, a API deve retornar o usuário atualizado com o status 200 OK.
              - Se o usuário não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
              - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
                 
-               - Cenários de erros:                                                                
-                    1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
-                    2. Login já existente: retornar um erro com a mensagem “Login already exists”; 
-                    3. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;          
-                    4. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.        
+          - Cenários de erros:                                                                
+               1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
+               2. Login já existente: retornar um erro com a mensagem “Login already exists”; 
+               3. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;          
+               4. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.        
 
+```
 
 <br>
 
 ### Login
-
-1. Se autenticar no sistema (/api/signin):
+```
+1. Fazer login no sistema (/api/signin):
     - Como usuário do sistema, desejo poder me autenticar no sistema, para que seja possivel o acesso total ao sistema.
 
-    <br>                            
 
-    - -[x]  Critérios de Aceitação:
+    - Critérios de Aceitação:
         - A API deve aceitar uma solicitação POST com os dados de login e senha do usuário.
-        - Se o login for bem-sucedido, a API deve retornar ao usuário as seguintes informações: nome do usuário e um token válido
-           e o status 200 OK.
+        - Se o login for bem-sucedido, a API deve retornar ao usuário as seguintes informações:
+           nome do usuário e um token válido e o status 200 OK.
         - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
 
-            - Cenários de erros:
-                1. Login inexistente ou senha inválida: retornar um erro com a mensagem “Invalid login or password”;
+    - Cenários de erros:
+        1. Login inexistente ou senha inválida: retornar um erro com a mensagem “Invalid login or password”;
+
+```
 
 <br>
 
-
 ### CRUD - Carros
-
+```
 1. Cadastrar um Novo Carro (/api/cars):
     - Como um usuário autenticado no sistema, desejo poder cadastrar um novo carro fornecendo informações como ano, modelo,
       cor e placa do carro, para registrar-lo no sistema.
 
-    <br>                            
 
-    - -[x]  Critérios de Aceitação:
+    - Critérios de Aceitação:
         - A API deve aceitar uma solicitação POST com os dados do novo carro.
         - Se o cadastro for bem-sucedido, a API deve retornar o carro recém-criado com o status 201 Created.
         - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
 
-            - Cenários de erros:
-              1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
-              2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
-              3. Placa já existente: retornar um erro com a mensagem “License plate already exists”;
-              4. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;
-              5. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
+    - Cenários de erros:
+      1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+      2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+      3. Placa já existente: retornar um erro com a mensagem “License plate already exists”;
+      4. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;
+      5. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
 
-<br>
 
 2. Listar Todos os Carros que pertence ao usuário autenticado no sistema (/api/cars):
 
     - Como um usuário autenticado no sistema, desejo poder visualizar todos os carros que estão cadastrado em meu nome,
    para ter uma visão geral dos carros registrados.
 
-    <br>
 
-    - -[x]  Critérios de Aceitação:
-        - A API deve retornar uma lista de todos os carros cadastrados em meu nome no sistema.
-          - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+    - Critérios de Aceitação:
+      - A API deve retornar uma lista de todos os carros cadastrados em meu nome no sistema.
+      - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
 
-            - Cenários de erros:
-              1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
-              2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+    - Cenários de erros:
+      1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+      2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
 
-  <br> 
 
 3. Buscar um Carro pelo ID (/api/cars/{id}):
 
-    - Como um usuário autenticado no sistema, desejo poder buscar um carro específico pelo seu ID, para visualizar os detalhes desse carro.
+    - Como um usuário autenticado no sistema, desejo poder buscar um carro específico
+     pelo seu ID, para visualizar os detalhes desse carro.
 
-    <br>
-
-    - -[x]  Critérios de Aceitação:
+    - Critérios de Aceitação:
         - A API deve aceitar uma solicitação GET com o ID do carro desejado.
         - Se o carro for encontrado, a API deve retornar os detalhes desse carro com o status 200 OK.
         - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
         - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
 
-            - Cenários de erros:
-                1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
-                2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
-                3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
+    - Cenários de erros:
+        1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+        2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+        3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
 
-
-<br>
 
 4. Remover um Carro pelo ID (/api/cars/{id}):
 
-    - Como um usuário autenticado no sistema, desejo poder remover um carro específico pelo seu ID, caso necessário.
+    - Como um usuário autenticado no sistema, desejo poder remover um carro específico 
+    pelo seu ID, caso necessário.
 
-   <br>
-
-    - -[x] Critérios de Aceitação:
+    - Critérios de Aceitação:
         - A API deve aceitar uma solicitação DELETE com o ID do carro a ser removido.
         - Se o carro for removido com sucesso, a API não precisará retornar um body e o status deverá ser 204 No Content.
         - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
         - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
 
-            - Cenários de erros:
-                1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
-                2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
-                3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
-
-
-<br>
+    - Cenários de erros:
+        1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+        2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+        3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
 
 
 5. Atualizar um Carro pelo ID (/api/cars/{id}):
 
-    - Como um usuário autenticado no sistema, desejo poder atualizar as informações de um carro específico pelo seu ID, caso necessário.
+    - Como um usuário autenticado no sistema, desejo poder atualizar as informações de um carro 
+    específico pelo seu ID, caso necessário.
 
-      <br>
-
-    -
-        -[x] Critérios de Aceitação:
-            - A API deve aceitar uma solicitação PUT com o ID do carro a ser atualizado juntamente com as informaçõs do
+       - Critérios de Aceitação:
+           - A API deve aceitar uma solicitação PUT com o ID do carro a ser atualizado juntamente com as informaçõs do
               carro como ano, modelo, cor e placa do carro todos esses campos deverão ser informados,
               mesmo que não forem alterados.
-            - Se a atualização for bem-sucedida, a API deve retornar o carro atualizado com o status 200 OK.
-            - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
-            - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
+           - Se a atualização for bem-sucedida, a API deve retornar o carro atualizado com o status 200 OK.
+           - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
+           - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
 
-              - Cenários de erros:
-                  1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
-                  2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
-                  3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
-                  4. Placa já existente: retornar um erro com a mensagem “License plate already exists”;
-                  5. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;
-                  6. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
+      - Cenários de erros:
+          1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+          2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+          3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
+          4. Placa já existente: retornar um erro com a mensagem “License plate already exists”;
+          5. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;
+          6. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
 
-
+```
 <br>
 
-
 ### User Info
-
+```
 1. Buscar informações do usuário logado (/api/me}):
 
-    - Como um usuário autenticado no sistema, desejo poder consultar as informações do meu usuario no sistema, para visualizar os detalhes adicionais.
+    - Como um usuário autenticado no sistema, desejo poder consultar as informações do meu usuario no sistema, 
+    para visualizar os detalhes adicionais.
 
-    <br>
 
-    - -[x]  Critérios de Aceitação:
-    - A API deve aceitar uma solicitação GET com um Authorization valido.
-    - A API deve retornar os detalhes desse usuário, acrescentado dos campos createdAt (data da criação do usuário) e  
-        lastLogin (data da última vez que o usuário realizou login) com o status 200 OK.
-    - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+        - Critérios de Aceitação:
+            - A API deve aceitar uma solicitação GET com um Authorization valido.
+            - A API deve retornar os detalhes desse usuário, acrescentado dos campos createdAt 
+                (data da criação do usuário) e lastLogin (data da última vez que o usuário realizou login)
+                com o status 200 OK.
+            - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
 
         - Cenários de erros:
             1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
             2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
-
+```
 
 <br>
 
