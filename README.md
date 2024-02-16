@@ -432,7 +432,7 @@ Esses são alguns exemplos dos endpoints, para saber mais sobre os demais endpoi
 
 
 ## Links da API
-HEROKU: https://dextra-challenge.herokuapp.com </br>
+HEROKU: https://pitang-tce-api-51bcd86fe773.herokuapp.com/swagger-ui.html </br>
 GITHUB: https://github.com/zlimaaa/pitang-tce-challenge </br>
 
 ## Links do Frontend
