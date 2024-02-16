@@ -30,6 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers("/api/**").hasAnyAuthority("USER")
                 .anyRequest().denyAll()
+                .and().headers().frameOptions().disable()
                 .and().apply(new JwtConfigurer(tokenProvider));
     }
 
@@ -73,6 +74,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/signin",
             // -- Users
             "/api/users",
-            "/api/users/**"
+            "/api/users/**",
+            // -- H2 Console Web
+            "/h2-console",
+            "/h2-console/**"
     };
 }
