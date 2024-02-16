@@ -436,7 +436,10 @@ HEROKU: https://pitang-tce-api-51bcd86fe773.herokuapp.com/swagger-ui.html </br>
 GITHUB: https://github.com/zlimaaa/pitang-tce-challenge </br>
 
 ## Links do Frontend
-GITHUB: https://github.com/zlimaaa/pitang-tce-challenge-web
+HEROKU: https://pitang-tce-web-29e64535a365.herokuapp.com/</br>
+GITHUB: https://github.com/zlimaaa/pitang-tce-challenge-web </br>
+ENCURTADOR: https://bit.ly/pitang-tce
+
 
 ## Contatos
 
