@@ -67,7 +67,8 @@ optei por não trazer maiores complexidades e verbosidades, nem maiores recursos
 - -[x] Criar um front-end mínimo com tecnologia baseada em JS (preferencialmente em Angular);
 - -[x] A aplicação deve aceitar e responder apenas em JSON;
 - -[x] Todas as rotas devem responder o código de status HTTP apropriado;
-- -[x] Espera-se que as mensagens de erro tenham o seguinte formato: { "message": "Error message", "errorCode": 123 }
+- -[x] Espera-se que as mensagens de erro tenham o seguinte formato: 
+{ "message": "Error message", "errorCode": 123 }
  
  <br>   
 
@@ -111,6 +112,7 @@ do Scrum onde o foco é realizar pequenas entregas, porém funcionais...
            - A API deve aceitar uma solicitação POST com os dados do novo usuário.
            - Se o cadastro for bem-sucedido, a API deve retornar o usuário recém-criado com o status 201 Created.
            - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
+             
              - Cenários de erros:
                 1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
                 2. Login já existente: retornar um erro com a mensagem “Login already exists”;
@@ -173,23 +175,166 @@ do Scrum onde o foco é realizar pequenas entregas, porém funcionais...
              - Se a atualização for bem-sucedida, a API deve retornar o usuário atualizado com o status 200 OK.
              - Se o usuário não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
              - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
-               -  Cenários de erros:                                                                
-                     1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
-                     2. Login já existente: retornar um erro com a mensagem “Login already exists”; 
-                     3. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;          
-                     4. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.        
+                
+               - Cenários de erros:                                                                
+                    1. E-mail já existente: retornar um erro com a mensagem “Email already exists”;
+                    2. Login já existente: retornar um erro com a mensagem “Login already exists”; 
+                    3. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;          
+                    4. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.        
 
 
+<br>
+
+### Login
+
+1. Se autenticar no sistema (/api/signin):
+    - Como usuário do sistema, desejo poder me autenticar no sistema, para que seja possivel o acesso total ao sistema.
+
+    <br>                            
+
+    - -[x]  Critérios de Aceitação:
+        - A API deve aceitar uma solicitação POST com os dados de login e senha do usuário.
+        - Se o login for bem-sucedido, a API deve retornar ao usuário as seguintes informações: nome do usuário e um token válido
+           e o status 200 OK.
+        - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+
+            - Cenários de erros:
+                1. Login inexistente ou senha inválida: retornar um erro com a mensagem “Invalid login or password”;
+
+<br>
 
 
+### CRUD - Carros
+
+1. Cadastrar um Novo Carro (/api/cars):
+    - Como um usuário autenticado no sistema, desejo poder cadastrar um novo carro fornecendo informações como ano, modelo,
+      cor e placa do carro, para registrar-lo no sistema.
+
+    <br>                            
+
+    - -[x]  Critérios de Aceitação:
+        - A API deve aceitar uma solicitação POST com os dados do novo carro.
+        - Se o cadastro for bem-sucedido, a API deve retornar o carro recém-criado com o status 201 Created.
+        - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
+
+            - Cenários de erros:
+              1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+              2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+              3. Placa já existente: retornar um erro com a mensagem “License plate already exists”;
+              4. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;
+              5. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
+
+<br>
+
+2. Listar Todos os Carros que pertence ao usuário autenticado no sistema (/api/cars):
+
+    - Como um usuário autenticado no sistema, desejo poder visualizar todos os carros que estão cadastrado em meu nome,
+   para ter uma visão geral dos carros registrados.
+
+    <br>
+
+    - -[x]  Critérios de Aceitação:
+        - A API deve retornar uma lista de todos os carros cadastrados em meu nome no sistema.
+          - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+
+            - Cenários de erros:
+              1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+              2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+
+  <br> 
+
+3. Buscar um Carro pelo ID (/api/cars/{id}):
+
+    - Como um usuário autenticado no sistema, desejo poder buscar um carro específico pelo seu ID, para visualizar os detalhes desse carro.
+
+    <br>
+
+    - -[x]  Critérios de Aceitação:
+        - A API deve aceitar uma solicitação GET com o ID do carro desejado.
+        - Se o carro for encontrado, a API deve retornar os detalhes desse carro com o status 200 OK.
+        - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
+        - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+
+            - Cenários de erros:
+                1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+                2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+                3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
 
 
+<br>
+
+4. Remover um Carro pelo ID (/api/cars/{id}):
+
+    - Como um usuário autenticado no sistema, desejo poder remover um carro específico pelo seu ID, caso necessário.
+
+   <br>
+
+    - -[x] Critérios de Aceitação:
+        - A API deve aceitar uma solicitação DELETE com o ID do carro a ser removido.
+        - Se o carro for removido com sucesso, a API não precisará retornar um body e o status deverá ser 204 No Content.
+        - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
+        - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+
+            - Cenários de erros:
+                1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+                2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+                3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
 
 
+<br>
 
+
+5. Atualizar um Carro pelo ID (/api/cars/{id}):
+
+    - Como um usuário autenticado no sistema, desejo poder atualizar as informações de um carro específico pelo seu ID, caso necessário.
+
+      <br>
+
+    -
+        -[x] Critérios de Aceitação:
+            - A API deve aceitar uma solicitação PUT com o ID do carro a ser atualizado juntamente com as informaçõs do
+              carro como ano, modelo, cor e placa do carro todos esses campos deverão ser informados,
+              mesmo que não forem alterados.
+            - Se a atualização for bem-sucedida, a API deve retornar o carro atualizado com o status 200 OK.
+            - Se o carro não for encontrado, a API deve retornar uma mensagem de erro com o status 404 Not Found.
+            - Se ocorrerem erros de validação, a API deve retornar uma mensagem de erro com o status apropriado.
+
+              - Cenários de erros:
+                  1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+                  2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+                  3. Permissão negada: retornar um erro com a mensagem “Unauthorized - permission denied”;
+                  4. Placa já existente: retornar um erro com a mensagem “License plate already exists”;
+                  5. Campos inválidos: retornar um erro com a mensagem “Invalid fields”;
+                  6. Campos não preenchidos: retornar um erro com a mensagem “Missing fields”.
+
+
+<br>
+
+
+### User Info
+
+1. Buscar informações do usuário logado (/api/me}):
+
+    - Como um usuário autenticado no sistema, desejo poder consultar as informações do meu usuario no sistema, para visualizar os detalhes adicionais.
+
+    <br>
+
+    - -[x]  Critérios de Aceitação:
+    - A API deve aceitar uma solicitação GET com um Authorization valido.
+    - A API deve retornar os detalhes desse usuário, acrescentado dos campos createdAt (data da criação do usuário) e  
+        lastLogin (data da última vez que o usuário realizou login) com o status 200 OK.
+    - Se ocorrerem erros, a API deve retornar uma mensagem de erro com o status apropriado.
+
+        - Cenários de erros:
+            1. Token não enviado: retornar um erro com a mensagem “Unauthorized”;
+            2. Token expirado: retornar um erro com a mensagem “Unauthorized - invalid session”;
+
+
+<br>
 
 ## Usando a Api (Primeiros passos)
-   A API deve retornar uma lista de todos os usuários cadastrados no sistema.
+
+
 `base url local: http://localhost:8080` </br>
 `base url heroku: https://dextra-challenge.herokuapp.com`
 
