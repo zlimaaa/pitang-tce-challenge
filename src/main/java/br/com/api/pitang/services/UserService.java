@@ -135,7 +135,8 @@ public class UserService {
      * @throws ValidationException caso falhe na validacao acima
      */
     private void validateUpdate(User user) {
-        User userSaved = convertDTOtoEntity(findById(user.getId()));
+        User userSaved = repository.findDistinctById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND));
 
         if (!isBlank(user.getPassword())) {
             if (user.getPassword().length() < 6)
